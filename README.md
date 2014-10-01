@@ -17,7 +17,7 @@ How to use it
 Installation
 ------------------
 ```bash
-npm install restshooter
+npm install -g restshooter
 ```
 
 
@@ -122,5 +122,5 @@ You need to create a file that represent the scenario. By convention we are usin
 Run the script
 --------------
 ```bash
-node shooter.js integration.cfg
+shooter integration.cfg
 ```
