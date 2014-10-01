@@ -1,0 +1,28 @@
+{
+  "name": "restshooter",
+  "version": "1.0.0",
+  "description": "Tools to shoot a scenario on a server only using REST call",
+  "main": "shooter.js",
+  "scripts": {
+    "test": "for f in tests/*; do echo \"$f\";node \"$f\";done; echo 'passed';exhit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oSamuDa/RestShooter"
+  },
+  "keywords": [
+    "REST",
+    "HTTP",
+    "call",
+    "POST",
+    "GET",
+    "Test",
+    "Integration"
+  ],
+  "author": "Olivier DAUMAS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oSamuDa/RestShooter/issues"
+  },
+  "homepage": "https://github.com/oSamuDa/RestShooter"
+}
