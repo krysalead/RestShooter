@@ -14,6 +14,13 @@ A Scenario is a list of steps, a step is a URL with parameter and checks (option
 How to use it
 =============
 
+Installation
+------------------
+```bash
+npm install restshooter
+```
+
+
 Configuration file
 ------------------
 First we have to define the configuration, one per platform to target. Lets call it integration.cfg
@@ -114,5 +121,6 @@ You need to create a file that represent the scenario. By convention we are usin
 
 Run the script
 --------------
-
+```bash
 node shooter.js integration.cfg
+```
