@@ -124,3 +124,14 @@ Run the script
 ```bash
 restshooter integration.cfg
 ```
+
+Known Issues
+--------------
+
+On OSX we have to link node installation as it is in linux system.
+
+```bash
+sudo ln -s /usr/local/bin/node /usr/bin/node
+```
+
+env: node\r: No such file or directory

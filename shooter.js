@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 /**
  * shooter.js This file is the entry point of the tool It loads the configuration and all the scenario and get the
  * associated steps
@@ -122,6 +122,11 @@ __loadTest = function(fileName) {
       });
 }
 
+if(process.argv[2]==undefined){
+  console.log("You must pass the configuration");
+  console.log("restshooter config.cfg");
+}else{
+
 logger.info("Reading config file : " + process.argv[2]);
 //Entry point of the program
 fs.readFile(process.argv[2], 'utf-8', function(error, data) {
@@ -133,3 +138,4 @@ fs.readFile(process.argv[2], 'utf-8', function(error, data) {
       setUp(cfg);
       loadTests(cfg.scenario);
     });
+}
