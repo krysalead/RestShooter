@@ -68,7 +68,7 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 	}]
 }
 ```
-**name** will be used in report and error to help investigation must be uniq per step.
+**name** will be used in report and error to help investigation must be unique per step.
 
 **url** will be added to the base url previously presented in the configuration.
 
@@ -122,5 +122,5 @@ You need to create a file that represent the scenario. By convention we are usin
 Run the script
 --------------
 ```bash
-shooter integration.cfg
+restshooter integration.cfg
 ```

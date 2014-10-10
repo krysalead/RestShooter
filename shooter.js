@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 /**
  * shooter.js This file is the entry point of the tool It loads the configuration and all the scenario and get the
  * associated steps
