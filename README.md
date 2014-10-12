@@ -20,6 +20,14 @@ Installation
 npm install -g restshooter
 ```
 
+Sample Project
+------------------
+
+Checkout the sample folder. You can run from this folder 
+```bash
+restshooter weather.cfg
+```
+
 
 Configuration file
 ------------------
@@ -133,5 +141,3 @@ On OSX we have to link node installation as it is in linux system.
 ```bash
 sudo ln -s /usr/local/bin/node /usr/bin/node
 ```
-
-env: node\r: No such file or directory
