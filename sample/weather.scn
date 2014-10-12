@@ -1,0 +1,19 @@
+{
+	name:'Weather',
+	steps:[	
+		'bycity.stp',{
+			name:"bycityid",
+			url:"weather",
+			method:"GET",
+			content:"JSON",
+			data:'?id=${ByCity.id}',
+			checks:[{
+				path:'weather',
+				test:'exist'
+			},{
+				path:'name',
+				value:'London'
+			}]
+		}
+	]
+}

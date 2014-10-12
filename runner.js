@@ -57,6 +57,7 @@ checkSession = function(json) {
  * @return {String} processed data
  */
 processData = function(data) {
+  if(data === undefined){ return "";}
   var R = new RegExp(/\$\{([\[\]0-9a-z\.]*)\}/ig), v, d = data;
   while ((v = R.exec(data)) != null) {
     var step = getStepVariableName(v[1]);
@@ -64,7 +65,7 @@ processData = function(data) {
     dot.shift();
     var value = checker.getJsonNode(dot.join("."), __data[step]);
     logger.debug("Processing " + v[0] + " by " + value + " in " + d);
-    d.replace(v[0], value);
+    d=d.replace(v[0], value);
   }
   logger.debug("Processed " + d);
   return d;
@@ -95,7 +96,9 @@ runPost = function(cfg, options, checks, callback) {
 runGet = function(cfg, options, checks, callback) {
   var data = processData(cfg.data);
   //Url encode the data
-  options.path += querystring.escape(cfg.data);
+  if(data !== ''){
+    options.path += querystring.escape(data);
+  }
   // Set up the request
   var get_req = http.request(options, function(res) {
         res.setEncoding('utf8');
@@ -108,6 +111,7 @@ runGet = function(cfg, options, checks, callback) {
 }
 
 handleResponse = function(cfg, chunk, checks, callback) {
+  logger.debug("Response data:");
   logger.debug(chunk);
   eval("var response=" + chunk);
   checkSession(response);

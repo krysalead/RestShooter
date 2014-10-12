@@ -74,28 +74,31 @@ exports.checkResponse = function(response, checks) {
   for (var i = 0; i < checks.length; i++) {
     logger.info("Checking:" + checks[i].path);
     var node = getJsonNode(checks[i].path, response);
-    if (node == undefined) {
-      messages.push("Node not found for " + checks[i].path, node);
-    } else {
-      if (checks[i].test) {
-        var tests = checks[i].test.split("|");
-        while (tests.length > 0) {
-          switch (tests.shift()) {
-            case 'exist' :
-              if (node == undefined)
-                messages.push("The " + checks[i].path + " must exist in the answer");
-              break;
-            case 'notempty' :
-              if (node == '')
-                messages.push("The " + checks[i].path + " must not be empty in the answer");
-              break;
-          }
+    if (checks[i].test) {
+      var tests = checks[i].test.split("|");
+      logger.debug("Performing tests:");
+      logger.debug(tests);
+      while (tests.length > 0) {
+        switch (tests.shift()) {
+          case 'exist' :
+            if (node === undefined){
+              messages.push("The " + checks[i].path + " must exist in the answer");
+              logger.error("The " + checks[i].path + " must exist in the answer");
+            }
+            break;
+          case 'notempty' :
+            if (node === ''){
+              messages.push("The " + checks[i].path + " must not be empty in the answer");
+              logger.error("The " + checks[i].path + " must not be empty in the answer");
+            }
+            break;
         }
       }
     }
     if (checks[i].value) {
       if (node != checks[i].value) {
         messages.push("Expected value for " + checks[i].path + " is " + checks[i].value + " but was " + node);
+        logger.error("Expected value for " + checks[i].path + " is " + checks[i].value + " but was " + node);
       }
     }
   }

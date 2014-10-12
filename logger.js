@@ -14,6 +14,25 @@ exports.setContext = function(context) {
   }
 };
 
+getTimeStamp = function(){
+  var d = new Date();
+  var ts = [];
+  ts.push("[");
+  ts.push(d.getFullYear());
+  ts.push("-");
+  ts.push(d.getMonth());
+  ts.push("-");
+  ts.push(d.getDate());
+  ts.push("-");
+  ts.push(d.getHours());
+  ts.push(":");
+  ts.push(d.getMinutes());
+  ts.push(":");
+  ts.push(d.getSeconds());
+  ts.push("]");
+  return ts.join("");
+};
+
 /**
  * Displayed only in debug mode
  * 
@@ -24,9 +43,10 @@ exports.setContext = function(context) {
  */
 exports.debug = function(message, data) {
   if (__context.debug) {
-    console.log(message);
+    console.log("[DEBUG]"+getTimeStamp()+" "+message);
     if (data != undefined) {
-      console.log(data);
+      //console.log("[DEBUG]"+getTimeStamp());
+      console.info(data);
     }
   }
 }
@@ -40,8 +60,9 @@ exports.debug = function(message, data) {
  *          data
  */
 exports.info = function(message, data) {
-  console.info(message);
+  console.info("[INFO]"+getTimeStamp()+" "+message);
   if (data != undefined) {
+    //console.info("[INFO]"+getTimeStamp());
     console.info(data);
   }
 }
@@ -55,8 +76,9 @@ exports.info = function(message, data) {
  *          data
  */
 exports.error = function(message, data) {
-  util.error(message);
+  util.error("[ERROR]"+getTimeStamp()+" "+message);
   if (data != undefined) {
+    //util.error("[ERROR]"+getTimeStamp());
     util.error(data);
   }
 }

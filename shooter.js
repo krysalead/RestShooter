@@ -8,6 +8,7 @@ fs = require("fs");
 util = require('util');
 runner = require('./runner.js');
 logger = require('./logger.js');
+os = require('os');
 
 //NO default config, this globale variable to be accessed everywhere
 __config = {
@@ -30,15 +31,25 @@ var __result = [];
  *          cfg
  * @deprecated
  */
-setUp = function(cfg) {
+setUp = function(cfg,conffile) {
+  cfg.root = extractRootFolder(conffile);
   __config = cfg;
+  logger.setContext(__config);
   logger.debug("--------------------");
   logger.debug("Server:" + __config.server);
   logger.debug("Scenario:" + __config.scenario);
   logger.debug("Report:" + __config.report);
+  logger.debug("Root:" + __config.root);
   logger.debug("--------------------");
   runner.setContext(__config);
-  logger.setContext(__config);
+}
+
+/**
+* base on the file name this method returns the folder root
+*/
+extractRootFolder = function(file){
+  logger.debug(file);
+  return file.substr(0,file.lastIndexOf(os.platform().indexOf("win32")>-1||os.platform().indexOf("win64")>-1?"\\":"/")+1);
 }
 
 /*Callback once the test is done*/
@@ -83,7 +94,7 @@ loadedTest = function(name, testCfg) {
     if (typeof testCfg.steps[i] == 'string') {
       //Load step
       logger.debug("Loading step : " + testCfg.steps[i]);
-      var data = fs.readFileSync(testCfg.steps[i], 'utf-8');
+      var data = fs.readFileSync(__config.root+testCfg.steps[i], 'utf-8');
       eval("var subTests=" + data);
       testCfg.steps[i] = subTests;
     }
@@ -102,7 +113,8 @@ loadTests = function(list) {
   totalTest = list.length;
   for (var i = 0; i < list.length; i++) {
     var fileName = list[i];
-    __loadTest(fileName);
+    logger.debug("Loading:"+__config.root+fileName);
+    __loadTest(__config.root+fileName);
   }
 }
 
@@ -127,15 +139,17 @@ if(process.argv[2]==undefined){
   console.log("restshooter config.cfg");
 }else{
 
-logger.info("Reading config file : " + process.argv[2]);
+configfile = process.argv[2];
+logger.info("Runnning on: "+os.platform());
+logger.info("Reading config file: " + configfile);
 //Entry point of the program
-fs.readFile(process.argv[2], 'utf-8', function(error, data) {
+fs.readFile(configfile, 'utf-8', function(error, data) {
       if (error) {
         util.error(error);
         return;
       }
       eval("var cfg=" + data);
-      setUp(cfg);
+      setUp(cfg,configfile);
       loadTests(cfg.scenario);
     });
 }
