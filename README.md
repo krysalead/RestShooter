@@ -149,14 +149,19 @@ Imagine that the previous step was the login (name:'login' in the step configura
 Then in the payload of the next step, lets call it getPreference, I can write something like
 
 ```javascript
+...
 data:'/${login.user.ref}/'
+...
 ```
 
 So the system will replace the varialbe by the value from the previous request and we will get the parameter of the logged user.
 
 **${}** is the syntax for the replacement
+
 **login** is the name of the step
+
 **user.ref** is the path to the variable in the JSON returned by the previous script
+
 
 Known Issues
 --------------
