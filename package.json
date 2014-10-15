@@ -1,6 +1,6 @@
 {
   "name": "restshooter",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Tools to shoot a scenario on a server only using REST call",
   "main": "shooter",
   "scripts": {
