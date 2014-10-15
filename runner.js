@@ -82,7 +82,7 @@ runPost = function(cfg, options, checks, callback) {
   var post_req = http.request(options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function(chunk) {
-              handleResponse(cfg, chunk, checks, callback);
+              handleResponse(options.url,cfg, chunk, checks, callback);
             });
       });
 
@@ -103,14 +103,14 @@ runGet = function(cfg, options, checks, callback) {
   var get_req = http.request(options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function(chunk) {
-              handleResponse(cfg, chunk, checks, callback);
+              handleResponse(options.url,cfg, chunk, checks, callback);
             });
       });
   logger.debug("Request Data:" + data);
   get_req.end();
 }
 
-handleResponse = function(cfg, chunk, checks, callback) {
+handleResponse = function(url,cfg, chunk, checks, callback) {
   logger.debug("Response data:");
   logger.debug(chunk);
   eval("var response=" + chunk);

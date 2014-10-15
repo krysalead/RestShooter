@@ -81,7 +81,7 @@ exports.checkResponse = function(response, checks) {
       while (tests.length > 0) {
         switch (tests.shift()) {
           case 'exist' :
-            if (node === undefined){
+            if (node === undefined || node === null){
               messages.push("The " + checks[i].path + " must exist in the answer");
               logger.error("The " + checks[i].path + " must exist in the answer");
             }
