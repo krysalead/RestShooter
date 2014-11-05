@@ -8,8 +8,10 @@ A Scenario is a list of steps, a step is a URL with parameter and checks (option
 * Run POST and GET
 * Check global field for a scenario
 * Check specific field for a step
-* Support only JSON for now
+* Support only JSON and XML for now
 * Propagate the Session over the whole scenario
+
+By default Session is retrieved from the cookie with JSESSIONID key and store in the cookie as JSESSIONID (J2EE)
  
 How to use it
 =============
@@ -41,8 +43,12 @@ First we have to define the configuration, one per platform to target. Lets call
 	"scenario":[
 		"login.scn"
 	],
-	"sessionPath":'sessionId',
-	"report":"myreport.log"
+	getSession:function(data,response){},
+	setSession:function(requestHeaderOptions,stepConfig,previousSession){},
+	preRequest:function(options){},
+	postRequest:function(response,data){},
+	"report":"myreport.log",
+	debug:true
 }
 ```
 
@@ -54,9 +60,17 @@ First we have to define the configuration, one per platform to target. Lets call
 
 **scenario** is an array of scenario to run, files that will be loaded independently
 
-**sessionPath** is the path in one of the JSON returned in the scenario that will give the session for the rest of the application (Will move to a Javascript function to make it more modular)
+**getSession** JavaScript function that allows to extract the session from the server response, it receive the data and the [response](http://nodejs.org/api/http.html#http_http_incomingmessage)
+
+**setSession** JavaScript function that allows to set the session in the header request options (Cookie), the step config (URL parameter for instance) and also the previous session so it can be propagated
+
+**preRequest** JavaScript function that allows to performe some changed in the request options before sending.
+
+**postRequest** JavaScript function that allows to clean up the response data or parse it if needed. It should returned a cleaned JSON version of the data.
 
 **Report** is the file where is report will be written at the end of the test
+
+**debug** If set to true it will output more information on the console.
 
 First Step
 ----------

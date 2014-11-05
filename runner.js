@@ -3,6 +3,7 @@
  */
 http = require('http');
 querystring = require("querystring");
+xmlParser = require('xml2js').parseString;
 checker = require('./checker.js');
 
 var __context = {};
@@ -15,57 +16,80 @@ var __session = '';
 //Not needed __config is available
 exports.setContext = function(context) {
   __context = context;
+  if (!isFunction(__context.postRequest)) {
+    if (__context.content && __context.content.toUpperCase() === "JSON") {
+      __context.postRequest = parseJson;
+    }
+    if (__context.content && __context.content.toUpperCase() === "XML") {
+      __context.postRequest = parseXML;
+    }
+  }
   checker.setContext(context);
 };
 
+function parseJson(data, callback) {
+  eval("var response=" + data);
+  callback.call({
+    data: response,
+    getnode: checker.getJsonNode
+  });
+}
+
+function parseXML(data, callback) {
+  xmlParser(data, function(err, result) {
+    callback.call({
+      data: result,
+      getnode: checker.getJsonNode
+    });
+  });
+}
+
+function isFunction(object) {
+  return (typeof object === 'function');
+}
+
 /**
  * Build the option to call the server based on the globale one and the specific to the step
- * 
+ *
  * @param {}
  *          cfg
  * @return {}
  */
 getOption = function(cfg) {
   var opt = {
-    hostname : __config.server,
-    port : __config.port,
-    path : __config.baseUrl + cfg.url,
-    method : cfg.method,
-    headers : {
-      'Content-Type' : 'application/json',
-      'Accept' : 'application/json',
-      'Cookie' : 'JSESSIONID=' + __session
+    hostname: __config.server,
+    port: __config.port,
+    path: __config.baseUrl + cfg.url,
+    method: cfg.method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     }
   };
-  logger.debug("Request Options", opt);
   return opt;
-}
-
-checkSession = function(json) {
-  if (__context.sessionPath != undefined) {
-    var node = checker.getJsonNode(__context.sessionPath, json);
-    __session = node;
-  }
 }
 
 /**
  * This method replace the variable ${} into the data passed in parameter according to the current content of the
  * scenario. '{id:${Login.ref}}' -> it will get from the Login step the node value of ref and replace in the string
- * 
+ *
  * @param {String}
  *          data
  * @return {String} processed data
  */
 processData = function(data) {
-  if(data === undefined){ return "";}
-  var R = new RegExp(/\$\{([\[\]0-9a-z\.]*)\}/ig), v, d = data;
+  if (data === undefined) {
+    return "";
+  }
+  var R = new RegExp(/\$\{([\[\]0-9a-z\.]*)\}/ig),
+    v, d = data;
   while ((v = R.exec(data)) != null) {
     var step = getStepVariableName(v[1]);
     var dot = v[1].split(".");
     dot.shift();
     var value = checker.getJsonNode(dot.join("."), __data[step]);
     logger.debug("Processing " + v[0] + " by " + value + " in " + d);
-    d=d.replace(v[0], value);
+    d = d.replace(v[0], value);
   }
   logger.debug("Processed " + d);
   return d;
@@ -78,13 +102,19 @@ getStepVariableName = function(key) {
 runPost = function(cfg, options, checks, callback) {
   var data = processData(cfg.data);
   options.headers['Content-Length'] = data.length;
+  //Call the pre process method if there is one
+  if (isFunction(__context.preRequest)) {
+    __context.preRequest(options);
+  }
+  logger.debug("Request Options", options);
+  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path + " (" + data + ")");
   // Set up the request
-  var post_req = http.request(options, function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function(chunk) {
-              handleResponse(options.url,cfg, chunk, checks, callback);
-            });
-      });
+  var post_req = http.request(options, function(response) {
+    response.setEncoding('utf8');
+    response.on('data', function(chunk) {
+      handleResponse(options.url, cfg, chunk, checks, callback, response);
+    });
+  });
 
   // post the data
   logger.debug("Request Data:" + data);
@@ -96,28 +126,53 @@ runPost = function(cfg, options, checks, callback) {
 runGet = function(cfg, options, checks, callback) {
   var data = processData(cfg.data);
   //Url encode the data
-  if(data !== ''){
-    options.path += querystring.escape(data);
+  if (data !== '') {
+    options.path += escapeParameter(data);
   }
+  //Call the pre process method if there is one
+  if (isFunction(__context.preRequest)) {
+    __context.preRequest(options);
+  }
+  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path);
   // Set up the request
-  var get_req = http.request(options, function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function(chunk) {
-              handleResponse(options.url,cfg, chunk, checks, callback);
-            });
-      });
+  var get_req = http.request(options, function(response) {
+    response.setEncoding('utf8');
+    response.on('data', function(chunk) {
+      handleResponse(options,cfg, chunk, checks, callback, response);
+    });
+  });
   logger.debug("Request Data:" + data);
   get_req.end();
 }
 
-handleResponse = function(url,cfg, chunk, checks, callback) {
+/**
+ * Escape only the value of the parameter and not the parameter so it splits the data as an array
+ */
+escapeParameter = function(data) {
+  //TODO : case of the path based parameter with no ? and &
+  var arr = data.split("?");
+  var index = arr > 1 ? 1 : 0;
+  var params = arr[index].split("&");
+  for (var i = 0; i < params.length; i++) {
+    var p = params[i].split("=");
+    params[i] = p[0] + "=" + querystring.escape(p[1]);
+  }
+  return arr[0] + "?"
+}
+
+handleResponse = function(options, cfg, chunk, checks, callback, server_response) {
   logger.debug("Response data:");
   logger.debug(chunk);
-  eval("var response=" + chunk);
-  checkSession(response);
-  var messages = checker.checkResponse(response, checks);
-  //there is no error we can store the result
-  __data[cfg.name] = response;
+  logger.store(chunk,cfg.url);
+  var cleaned = chunk;
+  if (isFunction(__context.postRequest)) {
+    cleaned = __context.postRequest(chunk, server_response);
+  }
+  //Store the session
+  __session = __context.getSession(server_response, cleaned);
+  var messages = checker.checkResponse(cleaned, checks);
+//there is no error we can store the result
+  __data[cfg.name] = cleaned;
   if (callback) {
     callback(messages, __steps[__stepIndex]);
   }
@@ -126,16 +181,17 @@ handleResponse = function(url,cfg, chunk, checks, callback) {
 nextStep = function(messages, step) {
   if (messages || step) {
     __ran.push({
-          messages : messages,
-          step : step
-        });
+      messages: messages,
+      step: step
+    });
   }
   __stepIndex++
-  if (__steps.length > __stepIndex) {
+  if (__steps.length > __stepIndex && messages == undefined) {
     var cfg = __steps[__stepIndex];
     var options = getOption(cfg);
+    //Call the method to set the session
+    __context.setSession(options,cfg,__session);
     logger.info("Running Step:" + cfg.name);
-    logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path);
 
     var checks = __checks != undefined ? __checks : [];
     if (cfg.checks) {
@@ -159,7 +215,7 @@ nextStep = function(messages, step) {
 /**
  * Entry point of the runner It will process all the steps passed un parameter and apply all the common checks, then it
  * will call the endcallback
- * 
+ *
  * @param {Array}
  *          steps a list of step object
  * @param {Array}
@@ -172,5 +228,6 @@ exports.run = function(steps, checks, endCallback) {
   __steps = steps;
   __checks = checks
   __endCallback = endCallback;
+  __data=[];
   nextStep();
 }

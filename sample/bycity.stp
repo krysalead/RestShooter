@@ -6,7 +6,7 @@
 	data:'?q=London,uk',
 	checks:[{
 				path:'weather',
-				value:'exist'
+				test:'exist'
 			},{
 		path:'name',
 		value:'London'

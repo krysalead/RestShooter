@@ -14,7 +14,7 @@ exports.setContext = function(context) {
   }
 };
 
-getTimeStamp = function(){
+getTimeStamp = function() {
   var d = new Date();
   var ts = [];
   ts.push("[");
@@ -35,7 +35,7 @@ getTimeStamp = function(){
 
 /**
  * Displayed only in debug mode
- * 
+ *
  * @param {String}
  *          message
  * @param {Object}
@@ -43,7 +43,7 @@ getTimeStamp = function(){
  */
 exports.debug = function(message, data) {
   if (__context.debug) {
-    console.log("[DEBUG]"+getTimeStamp()+" "+message);
+    console.log("[DEBUG]" + getTimeStamp() + " " + message);
     if (data != undefined) {
       //console.log("[DEBUG]"+getTimeStamp());
       console.info(data);
@@ -53,14 +53,14 @@ exports.debug = function(message, data) {
 
 /**
  * Display always
- * 
+ *
  * @param {String}
  *          message
  * @param {Object}
  *          data
  */
 exports.info = function(message, data) {
-  console.info("[INFO]"+getTimeStamp()+" "+message);
+  console.info("[INFO]" + getTimeStamp() + " " + message);
   if (data != undefined) {
     //console.info("[INFO]"+getTimeStamp());
     console.info(data);
@@ -69,14 +69,14 @@ exports.info = function(message, data) {
 
 /**
  * Display always on stdrr
- * 
+ *
  * @param {String}
  *          message
  * @param {Object}
  *          data
  */
 exports.error = function(message, data) {
-  util.error("[ERROR]"+getTimeStamp()+" "+message);
+  util.error("[ERROR]" + getTimeStamp() + " " + message);
   if (data != undefined) {
     //util.error("[ERROR]"+getTimeStamp());
     util.error(data);
@@ -85,11 +85,13 @@ exports.error = function(message, data) {
 
 /**
  * Entrypoint to write a report
- * 
+ *
  * @param {Array}
  *          result the result of the tests for each scenario and each step
  */
 exports.writeReport = function(result) {
+  var failed = getFailNumber(result);
+  logger.info("Tests Run: "+result.length+" Failed: "+failed+" Passed: "+(result.length-failed)+" Skipped: 0");
   if (__context.report) {
     writeLine("Report Generate at :" + new Date());
     writeLine("Test scenario ran: " + result.length);
@@ -100,6 +102,14 @@ exports.writeReport = function(result) {
       }
     }
   }
+}
+
+/**
+ * Store in a file the data passed in parameter
+ */
+exports.store = function(data,file) {
+  console.log(file);
+  fs.writeFileSync(file, data);
 }
 
 getFailNumber = function(result) {
@@ -114,7 +124,7 @@ getFailNumber = function(result) {
   return count;
 }
 
-exports.writeResponse = function(file,content){
+exports.writeResponse = function(file, content) {
   fs.appendFileSync(file, content);
 }
 

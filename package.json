@@ -1,10 +1,13 @@
 {
   "name": "restshooter",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Tools to shoot a scenario on a server only using REST call",
   "main": "shooter",
   "scripts": {
     "test": "for f in tests/*; do echo \"$f\";node \"$f\";done; echo 'passed';exhit 0"
+  },
+  "dependencies": {
+    "xml2js": "0.4.4"
   },
   "repository": {
     "type": "git",
@@ -19,9 +22,9 @@
     "Test",
     "Integration"
   ],
-  "preferGlobal":true,
-  "bin":{
-    "restshooter":"shooter.js"
+  "preferGlobal": true,
+  "bin": {
+    "restshooter": "shooter.js"
   },
   "author": "Olivier DAUMAS",
   "license": "MIT",
