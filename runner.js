@@ -163,7 +163,7 @@ escapeParameter = function(data) {
 handleResponse = function(options, cfg, chunk, checks, callback, server_response) {
   logger.debug("Response data:");
   logger.debug(chunk);
-  logger.store(chunk,cfg.url);
+  logger.store(chunk,cfg.name+".rs");
   var cleaned = chunk;
   if (isFunction(__context.postRequest)) {
     cleaned = __context.postRequest(chunk, server_response);

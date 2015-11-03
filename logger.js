@@ -2,8 +2,9 @@
  * logger.js This file contains all the method relative to the log into the application, debug and displayed message It
  * also contains the method to write the report
  */
-fs = require("fs");
-util = require('util');
+var fs = require("fs");
+var util = require('util');
+var chalk = require('chalk')
 
 var __context = {};
 exports.setContext = function(context) {
@@ -60,7 +61,7 @@ exports.debug = function(message, data) {
  *          data
  */
 exports.info = function(message, data) {
-  console.info("[INFO]" + getTimeStamp() + " " + message);
+  console.info(chalk.blue("[INFO]" + getTimeStamp() + " " + message));
   if (data != undefined) {
     //console.info("[INFO]"+getTimeStamp());
     console.info(data);
@@ -76,7 +77,7 @@ exports.info = function(message, data) {
  *          data
  */
 exports.error = function(message, data) {
-  util.error("[ERROR]" + getTimeStamp() + " " + message);
+  util.error(chalk.red("[ERROR]" + getTimeStamp() + " " + message));
   if (data != undefined) {
     //util.error("[ERROR]"+getTimeStamp());
     util.error(data);
@@ -108,7 +109,7 @@ exports.writeReport = function(result) {
  * Store in a file the data passed in parameter
  */
 exports.store = function(data,file) {
-  console.log(file);
+  logger.debug("Writing in : "+file);
   fs.writeFileSync(file, data);
 }
 
