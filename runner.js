@@ -110,13 +110,17 @@ runPost = function(cfg, options, checks, callback) {
   options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
   logger.debug("Request Options", options);
   logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path +
-    options.commonParam);
+    (options.commonParam ? options.commonParam : ""));
   // Set up the request
   var post_req = http.request(options, function(response) {
     response.setEncoding('utf8');
+    var resData = "";
     response.on('data', function(chunk) {
-      handleResponse(options.url, cfg, chunk, checks, callback, response);
+      resData += chunk;
     });
+    response.on('end', function(){
+      handleResponse(options.url, cfg, resData, checks, callback, response);
+    })
   });
 
   // post the data
