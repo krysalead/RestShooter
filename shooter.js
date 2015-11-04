@@ -63,12 +63,12 @@ setSession = function(options, stepConfig, previousSession) {
 }
 
 /**
-* We are passing the data to let the use search into it or into the response
+* We are passing the data to let the user search into it or into the response
 it must be returned to be shared accross the requests
 */
 getSession = function(response,data) {
-  console.log('STATUS: ' + response.statusCode);
-  console.log('HEADERS: ' + JSON.stringify(response.headers));
+  logger.debug('STATUS: ' + response.statusCode);
+  logger.debug('HEADERS: ' + JSON.stringify(response.headers));
   return "Ed_cx8lN4d13FwXeZQg5Iw";
 }
 
@@ -170,7 +170,7 @@ if (process.argv[2] == undefined) {
 } else {
 
   configfile = process.argv[2];
-  logger.info("Runnning on: " + os.platform());
+  logger.debug("Running on: " + os.platform());
   logger.info("Reading config file: " + configfile);
   //Entry point of the program
   fs.readFile(configfile, 'utf-8', function(error, data) {
