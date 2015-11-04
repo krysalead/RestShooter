@@ -5,10 +5,11 @@
  * associated steps
  */
 console.log("==== REST Shooter ====")
-fs = require("fs");
-util = require('util');
-runner = require('./runner.js');
-logger = require('./logger.js');
+var fs = require("fs");
+var path = require('path');
+var _ = require('lodash');
+var runner = require('./runner.js');
+var logger = require('./logger.js');
 os = require('os');
 
 //NO default config, this globale variable to be accessed everywhere
@@ -47,6 +48,7 @@ setUp = function(cfg, conffile) {
   }
   __config = cfg;
   logger.debug("--------------------");
+  logger.debug("Running on: " + os.platform() + "-" + path.sep);
   logger.debug("Server:" + __config.server);
   logger.debug("Scenario:" + __config.scenario);
   logger.debug("Report:" + __config.report);
@@ -66,7 +68,7 @@ setSession = function(options, stepConfig, previousSession) {
 * We are passing the data to let the user search into it or into the response
 it must be returned to be shared accross the requests
 */
-getSession = function(response,data) {
+getSession = function(response, data) {
   logger.debug('STATUS: ' + response.statusCode);
   logger.debug('HEADERS: ' + JSON.stringify(response.headers));
   return "Ed_cx8lN4d13FwXeZQg5Iw";
@@ -76,7 +78,7 @@ getSession = function(response,data) {
  * base on the file name this method returns the folder root
  */
 extractRootFolder = function(file) {
-  return file.substr(0, file.lastIndexOf(os.platform().indexOf("win32") > -1 || os.platform().indexOf("win64") > -1 ? "\\" : "/") + 1);
+  return file.substr(0, file.lastIndexOf(path.sep) + 1);
 }
 
 /*Callback once the test is done*/
@@ -91,8 +93,8 @@ nextTest = function(ran) {
   if (ran) {
     //Store the result
     __result.push(ran);
-    if(ran.messages && ran.messages.length){
-      logger.error("Step "+ran.step.name+" failed for "+ran.messages[0]);
+    if (ran.messages && ran.messages.length) {
+      logger.error("Step " + ran.step.name + " failed for " + ran.messages[0]);
     }
   }
   __testIndex++;
@@ -125,14 +127,34 @@ loadedTest = function(name, testCfg) {
       //Load step
       logger.debug("Loading step : " + testCfg.steps[i]);
       var data = fs.readFileSync(__config.root + testCfg.steps[i], 'utf-8');
-      eval("var subTests=" + data);
+      var subTests = JSON.parse(data);
+      //Extend a test with another one
+      if (subTests.extend) {
+        var o = {}
+        _.assign(o, getParentTest(subTests.extend), subTests);
+        subTests = o;
+      }
       testCfg.steps[i] = subTests;
+    } else {
+      logger.debug("Registered step : " + testCfg.steps[i].name);
     }
   }
+
   __testConfigs.push(testCfg);
   if (__testConfigs.length == totalTest) {
     startTesting();
   }
+}
+
+/*
+ * Return the configuration of a parent test
+ * @param {String} name of the parent test
+ */
+getParentTest = function(name) {
+  if (!_.endsWith(".stp")) {
+    name += ".stp";
+  }
+  return JSON.parse(fs.readFileSync(__config.root + name, 'utf-8'));
 }
 
 /**
@@ -155,30 +177,28 @@ loadTests = function(list) {
 __loadTest = function(fileName) {
   fs.readFile(fileName, 'utf-8', function(error, data) {
     if (error) {
-      util.error(error);
+      logger.error(error);
       return;
     }
-    eval("var testConfig=" + data);
+    var testConfig = JSON.parse(data);
     //Call the test loader to handle each steps
     loadedTest(fileName, testConfig);
   });
 }
 
 if (process.argv[2] == undefined) {
-  console.log("You must pass the configuration");
-  console.log("restshooter config.cfg");
+  logger.log("You must pass the configuration");
+  logger.log("restshooter config.cfg");
 } else {
-
   configfile = process.argv[2];
-  logger.debug("Running on: " + os.platform());
   logger.info("Reading config file: " + configfile);
   //Entry point of the program
   fs.readFile(configfile, 'utf-8', function(error, data) {
     if (error) {
-      util.error(error);
+      logger.error(error);
       return;
     }
-    eval("var cfg=" + data);
+    var cfg = JSON.parse(data);
     setUp(cfg, configfile);
     loadTests(cfg.scenario);
   });

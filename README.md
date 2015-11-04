@@ -12,7 +12,7 @@ A Scenario is a list of steps, a step is a URL with parameter and checks (option
 * Propagate the Session over the whole scenario
 
 By default Session is retrieved from the cookie with JSESSIONID key and store in the cookie as JSESSIONID (J2EE)
- 
+
 How to use it
 =============
 
@@ -25,7 +25,7 @@ npm install -g restshooter
 Sample Project
 ------------------
 
-Checkout the sample folder. You can run from this folder 
+Checkout the sample folder. You can run from this folder
 ```bash
 restshooter weather.cfg
 ```
@@ -43,12 +43,12 @@ First we have to define the configuration, one per platform to target. Lets call
 	"scenario":[
 		"login.scn"
 	],
-	getSession:function(data,response){},
-	setSession:function(requestHeaderOptions,stepConfig,previousSession){},
-	preRequest:function(options){},
-	postRequest:function(response,data){},
+	"getSession":function(data,response){},
+	"setSession":function(requestHeaderOptions,stepConfig,previousSession){},
+	"preRequest":function(options){},
+	"postRequest":function(response,data){},
 	"report":"myreport.log",
-	debug:true
+	"debug":true
 }
 ```
 
@@ -60,13 +60,13 @@ First we have to define the configuration, one per platform to target. Lets call
 
 **scenario** is an array of scenario to run, files that will be loaded independently
 
-**getSession** JavaScript function that allows to extract the session from the server response, it receive the data and the [response](http://nodejs.org/api/http.html#http_http_incomingmessage)
+**getSession** (optional) JavaScript function that allows to extract the session from the server response, it receive the data and the [response](http://nodejs.org/api/http.html#http_http_incomingmessage)
 
 **setSession** JavaScript function that allows to set the session in the header request options (Cookie), the step config (URL parameter for instance) and also the previous session so it can be propagated
 
-**preRequest** JavaScript function that allows to performe some changed in the request options before sending.
+**preRequest** (optional) JavaScript function that allows to performe some changed in the request options before sending.
 
-**postRequest** JavaScript function that allows to clean up the response data or parse it if needed. It should returned a cleaned JSON version of the data.
+**postRequest** (optional) JavaScript function that allows to clean up the response data or parse it if needed. It should returned a cleaned JSON version of the data.
 
 **Report** is the file where is report will be written at the end of the test
 
@@ -79,14 +79,13 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
 ```javascript
 {
-	name:"Login",
-	url:"/login",
-	method:"POST",
-	content:"JSON",
-	data:'{"login":"olivier",password:"mypass"}',
-	checks:[{
-		path:'response.answer',
-		value:'ok'
+	"name":"Login",
+	"url":"/login",
+	"method":"POST",
+	"data":"{\"login\":\"olivier\",\"password\":\"mypass\"}",
+	"checks":[{
+		"path":"response.answer",
+		"value":"ok"
 	}]
 }
 ```
@@ -96,7 +95,7 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
 **method** is for now `POST` or `GET`.
 
-**content** is the content type received.
+**extend** is a string to another steps to inherit from (ie: extend:'basicstep.stp').
 
 **data** is the data object to be sent. Always a string, it will be used as it is in POST and will be escaped for GET.
 
@@ -121,17 +120,18 @@ You need to create a file that represent the scenario. By convention we are usin
 
 ```javascript
 {
-	name:'Login',
-	steps:[	
+	"name":"Login",
+	"content":"JSON",
+	"steps":[
 		"login.stp"
 	],
-	checks:[{
-		path:'message',
-		value:''
+	"checks":[{
+		"path":"message",
+		"value":"
 	},
 	{
-		path:'code',
-		value:0
+		"path":"code",
+		"value":0
 	}]
 }
 ```
@@ -140,6 +140,8 @@ You need to create a file that represent the scenario. By convention we are usin
 **steps** is the list of the steps to run for the scenario execution.
 
 **checks** is the list of validation to perform on each request.
+
+**content** is the content type received.
 
 Run the script
 --------------
@@ -164,7 +166,7 @@ Then in the payload of the next step, lets call it getPreference, I can write so
 
 ```javascript
 ...
-data:'/${login.user.ref}/'
+"data":"/${login.user.ref}/"
 ...
 ```
 
@@ -172,7 +174,7 @@ getting a value in an list of value
 
 ```javascript
 ...
-data:'/${login.preferences[0].ref}/'
+"data":"/${login.preferences[0].ref}/"
 ...
 ```
 

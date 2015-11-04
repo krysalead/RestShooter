@@ -77,10 +77,9 @@ exports.info = function(message, data) {
  *          data
  */
 exports.error = function(message, data) {
-  util.error(chalk.red("[ERROR]" + getTimeStamp() + " " + message));
+  console.error(chalk.red("[ERROR]" + getTimeStamp() + " " + message));
   if (data != undefined) {
-    //util.error("[ERROR]"+getTimeStamp());
-    util.error(data);
+    console.error(data);
   }
 }
 
@@ -92,7 +91,12 @@ exports.error = function(message, data) {
  */
 exports.writeReport = function(result) {
   var failed = getFailNumber(result);
-  logger.info("Tests Run: "+result.length+" Failed: "+failed+" Passed: "+(result.length-failed)+" Skipped: 0");
+  var __print = chalk.green;
+  if (failed > 0) {
+    __print = chalk.red;
+  }
+  console.log(__print("Tests Run: " + result.length + " Failed: " + failed + " Passed: " + (result.length - failed) +
+    " Skipped: 0"));
   if (__context.report) {
     writeLine("Report Generate at :" + new Date());
     writeLine("Test scenario ran: " + result.length);
@@ -108,8 +112,8 @@ exports.writeReport = function(result) {
 /**
  * Store in a file the data passed in parameter
  */
-exports.store = function(data,file) {
-  logger.debug("Writing in : "+file);
+exports.store = function(data, file) {
+  logger.debug("Writing in : " + file);
   fs.writeFileSync(file, data);
 }
 

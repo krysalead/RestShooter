@@ -5,6 +5,7 @@ http = require('http');
 querystring = require("querystring");
 xmlParser = require('xml2js').parseString;
 checker = require('./checker.js');
+logger = require('./logger.js');
 
 var __context = {};
 var __stepIndex = -1;
@@ -27,15 +28,11 @@ exports.setContext = function(context) {
   checker.setContext(context);
 };
 
-function parseJson(data, callback) {
-  eval("var response=" + data);
-  callback.call({
-    data: response,
-    getnode: checker.getJsonNode
-  });
+function parseJson(data, server_response) {
+  return JSON.parse(data);
 }
 
-function parseXML(data, callback) {
+function parseXML(data, server_response) {
   xmlParser(data, function(err, result) {
     callback.call({
       data: result,
@@ -106,8 +103,10 @@ runPost = function(cfg, options, checks, callback) {
   if (isFunction(__context.preRequest)) {
     __context.preRequest(options);
   }
+  options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
   logger.debug("Request Options", options);
-  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path + " (" + data + ")");
+  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path +
+    options.commonParam);
   // Set up the request
   var post_req = http.request(options, function(response) {
     response.setEncoding('utf8');
@@ -133,12 +132,13 @@ runGet = function(cfg, options, checks, callback) {
   if (isFunction(__context.preRequest)) {
     __context.preRequest(options);
   }
+  options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
   logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path);
   // Set up the request
   var get_req = http.request(options, function(response) {
     response.setEncoding('utf8');
     response.on('data', function(chunk) {
-      handleResponse(options,cfg, chunk, checks, callback, response);
+      handleResponse(options, cfg, chunk, checks, callback, response);
     });
   });
   logger.debug("Request Data:" + data);
@@ -151,19 +151,19 @@ runGet = function(cfg, options, checks, callback) {
 escapeParameter = function(data) {
   //TODO : case of the path based parameter with no ? and &
   var arr = data.split("?");
-  var index = arr > 1 ? 1 : 0;
+  var index = arr.length > 1 ? 1 : 0;
   var params = arr[index].split("&");
   for (var i = 0; i < params.length; i++) {
     var p = params[i].split("=");
     params[i] = p[0] + "=" + querystring.escape(p[1]);
   }
-  return arr[0] + "?"
+  return arr[0] + "?" + params;
 }
 
 handleResponse = function(options, cfg, chunk, checks, callback, server_response) {
   logger.debug("Response data:");
   logger.debug(chunk);
-  logger.store(chunk,cfg.name+".rs");
+  logger.store(chunk, cfg.name + ".rs");
   var cleaned = chunk;
   if (isFunction(__context.postRequest)) {
     cleaned = __context.postRequest(chunk, server_response);
@@ -171,7 +171,7 @@ handleResponse = function(options, cfg, chunk, checks, callback, server_response
   //Store the session
   __session = __context.getSession(server_response, cleaned);
   var messages = checker.checkResponse(cleaned, checks);
-//there is no error we can store the result
+  //there is no error we can store the result
   __data[cfg.name] = cleaned;
   if (callback) {
     callback(messages, __steps[__stepIndex]);
@@ -186,11 +186,11 @@ nextStep = function(messages, step) {
     });
   }
   __stepIndex++
-  if (__steps.length > __stepIndex && messages == undefined) {
+  if (__steps.length > __stepIndex && (messages == undefined || messages.length == 0)) {
     var cfg = __steps[__stepIndex];
     var options = getOption(cfg);
     //Call the method to set the session
-    __context.setSession(options,cfg,__session);
+    __context.setSession(options, cfg, __session);
     logger.info("Running Step:" + cfg.name);
 
     var checks = __checks != undefined ? __checks : [];
@@ -228,6 +228,6 @@ exports.run = function(steps, checks, endCallback) {
   __steps = steps;
   __checks = checks
   __endCallback = endCallback;
-  __data=[];
+  __data = [];
   nextStep();
 }
