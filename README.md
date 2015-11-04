@@ -168,6 +168,14 @@ data:'/${login.user.ref}/'
 ...
 ```
 
+getting a value in an list of value
+
+```javascript
+...
+data:'/${login.preferences[0].ref}/'
+...
+```
+
 So the system will replace the varialbe by the value from the previous request and we will get the parameter of the logged user.
 
 **${}** is the syntax for the replacement
