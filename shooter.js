@@ -127,7 +127,7 @@ loadedTest = function(name, testCfg) {
       //Load step
       logger.debug("Loading step : " + testCfg.steps[i]);
       var data = fs.readFileSync(__config.root + testCfg.steps[i], 'utf-8');
-      var subTests = JSON.parse(data);
+      eval("var subTests=" + data);
       //Extend a test with another one
       if (subTests.extend) {
         var o = {}
@@ -180,7 +180,7 @@ __loadTest = function(fileName) {
       logger.error(error);
       return;
     }
-    var testConfig = JSON.parse(data);
+    eval("var testConfig=" + data);
     //Call the test loader to handle each steps
     loadedTest(fileName, testConfig);
   });
@@ -198,7 +198,7 @@ if (process.argv[2] == undefined) {
       logger.error(error);
       return;
     }
-    var cfg = JSON.parse(data);
+    eval("var cfg=" + data);
     setUp(cfg, configfile);
     loadTests(cfg.scenario);
   });
