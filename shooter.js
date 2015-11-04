@@ -61,6 +61,7 @@ setUp = function(cfg, conffile) {
  * Accept the header option of the request and the config for the current step it also receive the previous value of the session
  */
 setSession = function(options, stepConfig, previousSession) {
+  options.headers['Cookie'] = options.headers['Cookie'] ? options.headers['Cookie'] : "";
   options.headers['Cookie'] += 'JSESSIONID=' + previousSession;
 }
 
@@ -71,7 +72,7 @@ it must be returned to be shared accross the requests
 getSession = function(response, data) {
   logger.debug('STATUS: ' + response.statusCode);
   logger.debug('HEADERS: ' + JSON.stringify(response.headers));
-  return "Ed_cx8lN4d13FwXeZQg5Iw";
+  return "";
 }
 
 /**

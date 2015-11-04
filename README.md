@@ -43,6 +43,7 @@ First we have to define the configuration, one per platform to target. Lets call
 	"scenario":[
 		"login.scn"
 	],
+	"content":"JSON",
 	"getSession":function(data,response){},
 	"setSession":function(requestHeaderOptions,stepConfig,previousSession){},
 	"preRequest":function(options){},
@@ -71,6 +72,8 @@ First we have to define the configuration, one per platform to target. Lets call
 **Report** is the file where is report will be written at the end of the test
 
 **debug** If set to true it will output more information on the console.
+
+**content** is the content type received.
 
 First Step
 ----------
@@ -121,7 +124,6 @@ You need to create a file that represent the scenario. By convention we are usin
 ```javascript
 {
 	"name":"Login",
-	"content":"JSON",
 	"steps":[
 		"login.stp"
 	],
@@ -140,8 +142,6 @@ You need to create a file that represent the scenario. By convention we are usin
 **steps** is the list of the steps to run for the scenario execution.
 
 **checks** is the list of validation to perform on each request.
-
-**content** is the content type received.
 
 Run the script
 --------------

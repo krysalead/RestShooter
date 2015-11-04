@@ -17,7 +17,9 @@ var __session = '';
 //Not needed __config is available
 exports.setContext = function(context) {
   __context = context;
+  logger.debug("Has a postRequest function:" + isFunction(__context.postRequest));
   if (!isFunction(__context.postRequest)) {
+    logger.debug("Trying to fallback to:" + __context.content);
     if (__context.content && __context.content.toUpperCase() === "JSON") {
       __context.postRequest = parseJson;
     }
@@ -29,10 +31,12 @@ exports.setContext = function(context) {
 };
 
 function parseJson(data, server_response) {
+  logger.debug("Automatic JSON parsing");
   return JSON.parse(data);
 }
 
 function parseXML(data, server_response) {
+  logger.debug("Automatic XML parsing");
   xmlParser(data, function(err, result) {
     callback.call({
       data: result,
