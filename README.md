@@ -5,13 +5,19 @@ Rest Shooter is a node module able to take a list of scenario of URLs to call an
 A Scenario is a list of steps, a step is a URL with parameter and checks (optional)
 
 
+* Run HTTP only
 * Run POST and GET
 * Check global field for a scenario
 * Check specific field for a step
-* Support only JSON and XML for now
-* Propagate the Session over the whole scenario
+* Support only JSON and XML
+* Allows to propagate a session along a scenario
+* Allows to hook on request
 
-By default Session is retrieved from the cookie with JSESSIONID key and store in the cookie as JSESSIONID (J2EE)
+By default Session is retrieved from the cookie and store in the cookie as:
+* JSESSIONID (J2EE)
+* PHPSESSID (PHP)
+
+(Contact me if you want me to put other default id)
 
 How to use it
 =============
@@ -88,7 +94,7 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 	"data":"{\"login\":\"olivier\",\"password\":\"mypass\"}",
 	"checks":[{
 		"path":"response.answer",
-		"value":"ok"
+		"test":"exist|ok"
 	}]
 }
 ```
@@ -105,15 +111,18 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 **checks** is a list of checks to perform once the response is coming back from the server.
 
   * **path** is the path into the JSON returned to be checked (ie `{response:{answer:ok}}`).
-  * **value** is expect value for the previous specicified node.
   * **test** this is a set of test for a node like exist or notempty separated by a `|`.
 
 Here after the list of test:
 
-| Name          | Behavior                                       |
-| ------------- |------------------------------------------------|
-| Exist         | Fail if the node is not existing in the answer |
-| notempty      | Fail if the node is string empty or null       |
+| Name          | Behavior                                                 |
+| ------------- |----------------------------------------------------------|
+| notexist      | Fail if the node is existing in the answer               |
+| exist         | Fail if the node is not existing in the answer           |
+| existnotnull  | Fail if the node is existing but null                    |
+| notempty      | Fail if the node is string empty or null                 |
+| empty         | Fail if the node is string not empty                     |
+| default       | All value not listed above will be value comparison      |
 
 
 Second Step
@@ -129,11 +138,11 @@ You need to create a file that represent the scenario. By convention we are usin
 	],
 	"checks":[{
 		"path":"message",
-		"value":"
+		"test":""
 	},
 	{
 		"path":"code",
-		"value":0
+		"test":0
 	}]
 }
 ```
@@ -178,7 +187,7 @@ getting a value in an list of value
 ...
 ```
 
-So the system will replace the varialbe by the value from the previous request and we will get the parameter of the logged user.
+So the system will replace the variable by the value from the previous request and we will get the parameter of the logged user.
 
 **${}** is the syntax for the replacement
 

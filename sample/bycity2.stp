@@ -4,6 +4,6 @@
   "data":"?q=Paris,fr",
   "checks":[{
     "path":"name",
-    "value":"Paris"
+    "test":"exist|Paris"
   }]
 }

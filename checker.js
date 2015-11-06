@@ -7,7 +7,7 @@ assert = require('assert');
 var __context = {};
 /**
  * Context propagation, this method is receiving the context of the shoot
- * 
+ *
  * @param {Object}
  *          context
  */
@@ -17,7 +17,7 @@ exports.setContext = function(context) {
 
 /**
  * This method is exposed to external. It extract from the response object a path specified
- * 
+ *
  * @param {String}
  *          path this is a string with . (dot) that represent the path to a node we want be returned
  * @param {Object}
@@ -30,7 +30,7 @@ exports.getJsonNode = function(path, response) {
 
 /**
  * It extract from the response object a path specified
- * 
+ *
  * @param {String}
  *          path this is a string with . (dot) that represent the path to a node we want be returned
  * @param {Object}
@@ -61,7 +61,7 @@ getJsonNode = function(path, response) {
 /**
  * This method is exposed to external. Based on the Response and the checks passed in parameter it will validate the
  * request
- * 
+ *
  * @param {Object}
  *          response a JSON object that represent the response
  * @param {Array}
@@ -79,26 +79,45 @@ exports.checkResponse = function(response, checks) {
       logger.debug("Performing tests:");
       logger.debug(tests);
       while (tests.length > 0) {
-        switch (tests.shift()) {
-          case 'exist' :
-            if (node === undefined || node === null){
+        var tst = tests.shift()
+        switch (tst) {
+          case 'notexist':
+            if (node === undefined) {
+              messages.push("The " + checks[i].path + " must not exist in the answer");
+              logger.error("The " + checks[i].path + " must not exist in the answer");
+            }
+            break;
+          case 'exist':
+            if (node === undefined) {
               messages.push("The " + checks[i].path + " must exist in the answer");
               logger.error("The " + checks[i].path + " must exist in the answer");
             }
             break;
-          case 'notempty' :
-            if (node === ''){
+          case 'existnotnull':
+            if (node === undefined || node === null) {
+              messages.push("The " + checks[i].path + " must exist and not be null in the answer");
+              logger.error("The " + checks[i].path + " must exist and not be null  in the answer");
+            }
+            break;
+          case 'notempty':
+            if (node === '') {
               messages.push("The " + checks[i].path + " must not be empty in the answer");
               logger.error("The " + checks[i].path + " must not be empty in the answer");
             }
             break;
+          case 'empty':
+            if (node === '') {
+              messages.push("The " + checks[i].path + " must be empty in the answer");
+              logger.error("The " + checks[i].path + " must be empty in the answer");
+            }
+            break;
+          default:
+            if (node != tst) {
+              messages.push("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
+              logger.error("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
+            }
+
         }
-      }
-    }
-    if (checks[i].value) {
-      if (node != checks[i].value) {
-        messages.push("Expected value for " + checks[i].path + " is " + checks[i].value + " but was " + node);
-        logger.error("Expected value for " + checks[i].path + " is " + checks[i].value + " but was " + node);
       }
     }
   }

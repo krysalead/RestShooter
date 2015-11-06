@@ -118,7 +118,7 @@ runPost = function(cfg, options, checks, callback) {
     response.on('data', function(chunk) {
       resData += chunk;
     });
-    response.on('end', function(){
+    response.on('end', function() {
       handleResponse(options.url, cfg, resData, checks, callback, response);
     })
   });
@@ -169,13 +169,13 @@ escapeParameter = function(data) {
 }
 
 handleResponse = function(options, cfg, chunk, checks, callback, server_response) {
-  logger.debug("Response data:");
-  logger.debug(chunk);
   logger.store(chunk, cfg.name + ".rs");
   var cleaned = chunk;
   if (isFunction(__context.postRequest)) {
     cleaned = __context.postRequest(chunk, server_response);
   }
+  logger.debug('STATUS: ' + server_response.statusCode);
+  logger.debug('HEADERS: ' + JSON.stringify(server_response.headers));
   //Store the session
   __session = __context.getSession(server_response, cleaned);
   var messages = checker.checkResponse(cleaned, checks);

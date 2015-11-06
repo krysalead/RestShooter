@@ -113,7 +113,7 @@ exports.writeReport = function(result) {
  * Store in a file the data passed in parameter
  */
 exports.store = function(data, file) {
-  logger.debug("Writing in : " + file);
+  logger.debug("Response data in: " + file);
   fs.writeFileSync(file, data);
 }
 
