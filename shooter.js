@@ -61,7 +61,7 @@ setUp = function(cfg, conffile) {
  * Accept the header option of the request and the config for the current step it also receive the previous value of the session
  */
 setSession = function(options, stepConfig, previousSession) {
-  response.headers['Cookie'] = response.headers['Cookie'] ? response.headers['Cookie'] : [];
+  options.headers['Cookie'] = options.headers['Cookie'] ? options.headers['Cookie'] : [];
   options.headers['Cookie']['JSESSIONID'] = previousSession;
   options.headers['Cookie']['PHPSESSID'] = previousSession;
 }
