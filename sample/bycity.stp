@@ -1,13 +1,20 @@
 {
-	"name":"ByCity",
-	"url":"weather",
-	"method":"GET",
-	"data":"?q=London,uk",
-	"checks":[{
-				"path":"weather",
-				"test":"exist"
-			},{
-		"path":"name",
-		"value":"London"
-	}]
+    "checks": [
+        {
+            "path": "weather",
+            "test": "exist"
+        },
+        {
+            "path": "name",
+            "test": "London"
+        },
+        {
+            "path": "cod",
+            "test": 200
+        }
+    ],
+    "data": "?q=London,uk",
+    "method": "GET",
+    "name": "ByCity",
+    "url": "weather"
 }

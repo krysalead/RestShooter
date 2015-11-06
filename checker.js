@@ -74,8 +74,9 @@ exports.checkResponse = function(response, checks) {
   for (var i = 0; i < checks.length; i++) {
     logger.info("Checking:" + checks[i].path);
     var node = getJsonNode(checks[i].path, response);
-    if (checks[i].test) {
-      var tests = checks[i].test.split("|");
+    if (checks[i].test !== undefined && checks[i].test !== null) {
+      var tests = (typeof checks[i].test === 'string' || checks[i].test instanceof String) ? checks[i].test.split("|") :
+        [checks[i].test];
       logger.debug("Performing tests:");
       logger.debug(tests);
       while (tests.length > 0) {
@@ -112,7 +113,7 @@ exports.checkResponse = function(response, checks) {
             }
             break;
           default:
-            if (node != tst) {
+            if (node !== tst) {
               messages.push("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
               logger.error("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
             }
