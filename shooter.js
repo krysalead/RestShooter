@@ -108,6 +108,7 @@ nextTest = function(ran) {
   } else {
     logger.info("Writting report");
     logger.writeReport(__result);
+    __result = [];
   }
 }
 
@@ -122,18 +123,19 @@ startTesting = function() {
  * @param {Object} testCfg
  */
 loadedTest = function(name, testCfg) {
+  var root = extractRootFolder(name);
   logger.debug("Scenario loaded:" + name);
   //Check the subtests
   for (var i = 0; i < testCfg.steps.length; i++) {
     if (typeof testCfg.steps[i] == 'string') {
       //Load step
       logger.debug("Loading step : " + testCfg.steps[i]);
-      var data = fs.readFileSync(__config.root + testCfg.steps[i], 'utf-8');
+      var data = fs.readFileSync(root + testCfg.steps[i], 'utf-8');
       eval("var subTests=" + data);
       //Extend a test with another one
       if (subTests.extend) {
         var o = {}
-        _.assign(o, getParentTest(subTests.extend), subTests);
+        _.assign(o, getParentTest(subTests.extend,root), subTests);
         subTests = o;
       }
       testCfg.steps[i] = subTests;
@@ -150,13 +152,14 @@ loadedTest = function(name, testCfg) {
 
 /*
  * Return the configuration of a parent test
- * @param {String} name of the parent test
+ * @param {String} path of the parent test
+ * @param {String} root to load the parent test
  */
-getParentTest = function(name) {
+getParentTest = function(name,root) {
   if (!_.endsWith(".stp")) {
     name += ".stp";
   }
-  return JSON.parse(fs.readFileSync(__config.root + name, 'utf-8'));
+  return JSON.parse(fs.readFileSync(root + name, 'utf-8'));
 }
 
 /**

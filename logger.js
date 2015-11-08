@@ -97,6 +97,9 @@ exports.writeReport = function(result) {
   }
   console.log(__print("Scenario Run: " + result.length + " Failed: " + failed + " Passed: " + (result.length - failed) +
     " Total steps: " + getNumberOfSteps(result)));
+  if (failed > 0) {
+    print_messages(result);
+  }
   if (__context.report) {
     writeLine("Report Generate at :" + new Date());
     writeLine("Test scenario ran: " + result.length);
@@ -123,6 +126,16 @@ getNumberOfSteps = function(result) {
 exports.store = function(data, file) {
   logger.debug("Response data in: " + file);
   fs.writeFileSync(file, data);
+}
+
+print_messages = function(result){
+for (var i = 0; i < result.length; i++) {
+    for (var j = 0; j < result[i].length; j++) {
+      for(var k=0;k<result[i][j].messages.length;k++) {
+        logger.error(result[i][j].step.name+"-"+result[i][j].messages[k]);
+      }
+    }
+  }
 }
 
 getFailNumber = function(result) {

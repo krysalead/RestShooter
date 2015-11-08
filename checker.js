@@ -80,9 +80,9 @@ exports.checkResponse = function(response, checks) {
       ];
       logger.debug("Performing tests:");
       logger.debug(tests);
-      var msg = null;
       while (tests.length > 0) {
-        var tst = tests.shift()
+        var tst = tests.shift();
+        var msg = null;
         switch (tst) {
           case 'notexist':
             if (node === undefined) {

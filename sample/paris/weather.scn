@@ -1,7 +1,7 @@
 {
-	"name":"Weather",
+	"name":"WeatherAtParis",
 	"steps":[
-		"bycity.stp","bycity2.stp",{
+		"bycity.stp",{
 			"name":"bycityid",
 			"url":"weather",
 			"method":"GET",
@@ -11,7 +11,7 @@
 				"test":"exist"
 			},{
 				"path":"name",
-				"value":"London"
+				"test":"paris"
 			}]
 		}
 	]

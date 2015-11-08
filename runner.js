@@ -6,6 +6,7 @@ querystring = require("querystring");
 xmlParser = require('xml2js').parseString;
 checker = require('./checker.js');
 logger = require('./logger.js');
+var _ = require('lodash');
 
 var __context = {};
 var __stepIndex = -1;
@@ -152,7 +153,7 @@ runGet = function(cfg, options, checks, callback) {
   var report = {
       startedAt: (new Date()).getTime(),
       step: __steps[__stepIndex],
-      checks: checks
+      messages:[]
     }
     // Set up the request
   var get_req = http.request(options, function(response) {
@@ -196,7 +197,8 @@ handleResponse = function(options, cfg, chunk, report, callback, server_response
   logger.debug('HEADERS: ' + JSON.stringify(server_response.headers));
   //Store the session
   __session = __context.getSession(server_response, cleaned);
-  report.messages = checker.checkResponse(cleaned, report.checks);
+  //report.messages=_.flatten(report.messages.push(checker.checkResponse(cleaned, report.checks)));
+  report.messages=checker.checkResponse(cleaned, report.step.checks);
   //there is no error we can store the result
   __data[cfg.name] = cleaned;
   if (callback) {
@@ -249,6 +251,7 @@ nextStep = function(report) {
  */
 exports.run = function(steps, checks, endCallback) {
   __stepIndex = -1;
+  __ran = []
   __steps = steps;
   __checks = checks
   __endCallback = endCallback;
