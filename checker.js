@@ -75,49 +75,48 @@ exports.checkResponse = function(response, checks) {
     logger.info("Checking:" + checks[i].path);
     var node = getJsonNode(checks[i].path, response);
     if (checks[i].test !== undefined && checks[i].test !== null) {
-      var tests = (typeof checks[i].test === 'string' || checks[i].test instanceof String) ? checks[i].test.split("|") :
-        [checks[i].test];
+      var tests = (typeof checks[i].test === 'string' || checks[i].test instanceof String) ? checks[i].test.split("|") : [
+        checks[i].test
+      ];
       logger.debug("Performing tests:");
       logger.debug(tests);
+      var msg = null;
       while (tests.length > 0) {
         var tst = tests.shift()
         switch (tst) {
           case 'notexist':
             if (node === undefined) {
-              messages.push("The " + checks[i].path + " must not exist in the answer");
-              logger.error("The " + checks[i].path + " must not exist in the answer");
+              msg = "The " + checks[i].path + " must not exist in the answer";
             }
             break;
           case 'exist':
             if (node === undefined) {
-              messages.push("The " + checks[i].path + " must exist in the answer");
-              logger.error("The " + checks[i].path + " must exist in the answer");
+              msg = "The " + checks[i].path + " must exist in the answer";
             }
             break;
           case 'existnotnull':
             if (node === undefined || node === null) {
-              messages.push("The " + checks[i].path + " must exist and not be null in the answer");
-              logger.error("The " + checks[i].path + " must exist and not be null  in the answer");
+              msg = "The " + checks[i].path + " must exist and not be null in the answer";
             }
             break;
           case 'notempty':
             if (node === '') {
-              messages.push("The " + checks[i].path + " must not be empty in the answer");
-              logger.error("The " + checks[i].path + " must not be empty in the answer");
+              msg = "The " + checks[i].path + " must not be empty in the answer";
             }
             break;
           case 'empty':
             if (node === '') {
-              messages.push("The " + checks[i].path + " must be empty in the answer");
-              logger.error("The " + checks[i].path + " must be empty in the answer");
+              msg = "The " + checks[i].path + " must be empty in the answer";
             }
             break;
           default:
             if (node !== tst) {
-              messages.push("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
-              logger.error("Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'");
+              msg = "Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'";
             }
-
+        }
+        if (msg !== null) {
+          messages.push(msg);
+          logger.error(msg);
         }
       }
     }

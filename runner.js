@@ -111,7 +111,12 @@ runPost = function(cfg, options, checks, callback) {
   logger.debug("Request Options", options);
   logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path +
     (options.commonParam ? options.commonParam : ""));
-  // Set up the request
+  var report = {
+      startedAt: (new Date()).getTime(),
+      step: __steps[__stepIndex],
+      checks: checks
+    }
+    // Set up the request
   var post_req = http.request(options, function(response) {
     response.setEncoding('utf8');
     var resData = "";
@@ -119,11 +124,12 @@ runPost = function(cfg, options, checks, callback) {
       resData += chunk;
     });
     response.on('end', function() {
-      handleResponse(options.url, cfg, resData, checks, callback, response);
+      handleResponse(options.url, cfg, resData, report, callback, response);
     })
   });
 
   // post the data
+  logger.debug("Requested at:" + report.startedAt);
   logger.debug("Request Data:" + data);
   post_req.write(data + "\n");
   post_req.end();
@@ -141,14 +147,25 @@ runGet = function(cfg, options, checks, callback) {
     __context.preRequest(options);
   }
   options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
+  logger.debug("Request Options", options);
   logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path);
-  // Set up the request
+  var report = {
+      startedAt: (new Date()).getTime(),
+      step: __steps[__stepIndex],
+      checks: checks
+    }
+    // Set up the request
   var get_req = http.request(options, function(response) {
     response.setEncoding('utf8');
+    var resData = "";
     response.on('data', function(chunk) {
-      handleResponse(options, cfg, chunk, checks, callback, response);
+      resData += chunk;
+    });
+    response.on('end', function() {
+      handleResponse(options, cfg, resData, report, callback, response);
     });
   });
+  logger.debug("Requested at:" + report.startedAt);
   logger.debug("Request Data:" + data);
   get_req.end();
 }
@@ -168,7 +185,8 @@ escapeParameter = function(data) {
   return arr[0] + "?" + params;
 }
 
-handleResponse = function(options, cfg, chunk, checks, callback, server_response) {
+handleResponse = function(options, cfg, chunk, report, callback, server_response) {
+  report.endedAt = (new Date()).getTime();
   logger.store(chunk, cfg.name + ".rs");
   var cleaned = chunk;
   if (isFunction(__context.postRequest)) {
@@ -178,23 +196,21 @@ handleResponse = function(options, cfg, chunk, checks, callback, server_response
   logger.debug('HEADERS: ' + JSON.stringify(server_response.headers));
   //Store the session
   __session = __context.getSession(server_response, cleaned);
-  var messages = checker.checkResponse(cleaned, checks);
+  report.messages = checker.checkResponse(cleaned, report.checks);
   //there is no error we can store the result
   __data[cfg.name] = cleaned;
   if (callback) {
-    callback(messages, __steps[__stepIndex]);
+    callback(report);
   }
 }
 
-nextStep = function(messages, step) {
-  if (messages || step) {
-    __ran.push({
-      messages: messages,
-      step: step
-    });
+nextStep = function(report) {
+  if (report) {
+    __ran.push(report);
   }
   __stepIndex++
-  if (__steps.length > __stepIndex && (messages == undefined || messages.length == 0)) {
+  if (__steps.length > __stepIndex && (report == undefined || report.messages == undefined || report.messages.length ==
+      0)) {
     var cfg = __steps[__stepIndex];
     var options = getOption(cfg);
     //Call the method to set the session

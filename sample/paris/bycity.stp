@@ -1,6 +1,6 @@
 {
-  "name":"ByCity2",
-  "extend":"ByCity",
+  "name":"ByCity",
+  "extend":"../common/ByCity",
   "data":"?q=Paris,fr",
   "checks":[{
     "path":"name",

@@ -95,8 +95,8 @@ exports.writeReport = function(result) {
   if (failed > 0) {
     __print = chalk.red;
   }
-  console.log(__print("Tests Run: " + result.length + " Failed: " + failed + " Passed: " + (result.length - failed) +
-    " Skipped: 0"));
+  console.log(__print("Scenario Run: " + result.length + " Failed: " + failed + " Passed: " + (result.length - failed) +
+    " Total steps: " + getNumberOfSteps(result)));
   if (__context.report) {
     writeLine("Report Generate at :" + new Date());
     writeLine("Test scenario ran: " + result.length);
@@ -107,6 +107,14 @@ exports.writeReport = function(result) {
       }
     }
   }
+}
+
+getNumberOfSteps = function(result) {
+  var count = 0;
+  for (var i = 0; i < result.length; i++) {
+    count += result[i].length;
+  }
+  return count;
 }
 
 /**
@@ -137,7 +145,7 @@ writeResult = function(result) {
   writeLine(result.step.name);
   writeLine("=============");
   for (var i = 0; i < result.messages.length; i++) {
-    writeLine(result.messages[i]);
+    writeLine(result.messages[i] === '' ? "Passed" : result.messages[i]);
   }
   writeLine("=============");
 }

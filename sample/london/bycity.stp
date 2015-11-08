@@ -1,0 +1,8 @@
+{
+  "name":"ByCity",
+  "extend":"../common/ByCity",
+  "checks":[{
+    "path":"name",
+    "test":"exist|London"
+  }]
+}
