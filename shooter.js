@@ -80,7 +80,8 @@ getSession = function(response, data) {
  * base on the file name this method returns the folder root
  */
 extractRootFolder = function(file) {
-  return file.substr(0, file.lastIndexOf(path.sep) + 1);
+  var pos = file.lastIndexOf('/') != -1 ? file.lastIndexOf('/') : file.lastIndexOf('\\')
+  return file.substr(0, pos);
 }
 
 /*Callback once the test is done*/
@@ -123,7 +124,7 @@ startTesting = function() {
  * @param {Object} testCfg
  */
 loadedTest = function(name, testCfg) {
-  var root = extractRootFolder(name);
+  var root = extractRootFolder(name) + path.sep;
   logger.debug("Scenario loaded:" + name);
   //Check the subtests
   for (var i = 0; i < testCfg.steps.length; i++) {
@@ -135,7 +136,7 @@ loadedTest = function(name, testCfg) {
       //Extend a test with another one
       if (subTests.extend) {
         var o = {}
-        _.assign(o, getParentTest(subTests.extend,root), subTests);
+        _.assign(o, getParentTest(subTests.extend, root), subTests);
         subTests = o;
       }
       testCfg.steps[i] = subTests;
@@ -155,7 +156,7 @@ loadedTest = function(name, testCfg) {
  * @param {String} path of the parent test
  * @param {String} root to load the parent test
  */
-getParentTest = function(name,root) {
+getParentTest = function(name, root) {
   if (!_.endsWith(".stp")) {
     name += ".stp";
   }
