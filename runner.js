@@ -1,12 +1,14 @@
 /**
  * runner.js This file is the one that call the targeted server. It call then the checker to verify the response
  */
-http = require('http');
-querystring = require("querystring");
-xmlParser = require('xml2js').parseString;
-checker = require('./checker.js');
-logger = require('./logger.js');
+var http = require('http');
+var https = require('https');
+var querystring = require("querystring");
+var xmlParser = require('xml2js').parseString;
+var checker = require('./checker.js');
+var logger = require('./logger.js');
 var _ = require('lodash');
+var Spinner = require('cli-spinner').Spinner;
 
 var __context = {};
 var __stepIndex = -1;
@@ -101,73 +103,75 @@ getStepVariableName = function(key) {
   return key.split(".").shift();
 }
 
-runPost = function(cfg, options, checks, callback) {
-  var data = processData(cfg.data);
-  options.headers['Content-Length'] = data.length;
+logOptions = function(cfg, options) {
+  logger.debug("Request Options", options);
+  logger.debug("Calling:[" + options.method + "] " + __context.protocol + "://" + options.hostname + ":" + options.port +
+    options.path +
+    (options.commonParam ? options.commonParam : ""));
+}
+
+responseHandler = function(response, options, cfg, report, callback) {
+  response.setEncoding('utf8');
+  var resData = "";
+  response.on('data', function(chunk) {
+    resData += chunk;
+  });
+  response.on('end', function() {
+    report.spinner.stop();
+    handleResponse(options.url, cfg, resData, report, callback, response);
+  })
+}
+
+preRequest = function(cfg, options) {
+  cfg.data = processData(cfg.data);
   //Call the pre process method if there is one
   if (isFunction(__context.preRequest)) {
     __context.preRequest(options);
   }
   options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
-  logger.debug("Request Options", options);
-  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path +
-    (options.commonParam ? options.commonParam : ""));
+  logOptions(cfg, options);
+  var spinner = new Spinner('processing.. %s');
+  spinner.setSpinnerString('|/-\\');
   var report = {
       startedAt: (new Date()).getTime(),
       step: __steps[__stepIndex],
-      checks: checks
+      messages: [],
+      spinner: spinner
     }
-    // Set up the request
-  var post_req = http.request(options, function(response) {
-    response.setEncoding('utf8');
-    var resData = "";
-    response.on('data', function(chunk) {
-      resData += chunk;
-    });
-    response.on('end', function() {
-      handleResponse(options.url, cfg, resData, report, callback, response);
-    })
-  });
-
-  // post the data
+    // post the data
   logger.debug("Requested at:" + report.startedAt);
-  logger.debug("Request Data:" + data);
-  post_req.write(data + "\n");
+  logger.debug("Request Data:" + cfg.data);
+  spinner.start();
+  return report;
+}
+
+getProtocol = function() {
+  return __context.protocol.toUpperCase === "HTTP" ? http : https;
+}
+
+runPost = function(cfg, options, checks, callback) {
+  //Prepare the request, modify the options and configuration, log information and time
+  var report = preRequest(cfg, options);
+  options.headers['Content-Length'] = cfg.data.length;
+  // Set up the request
+  var post_req = getProtocol().request(options, function(response) {
+    responseHandler(response, options, cfg, report, callback)
+  });
+  post_req.write(cfg.data + "\n");
   post_req.end();
 
 }
 
 runGet = function(cfg, options, checks, callback) {
-  var data = processData(cfg.data);
+  var report = preRequest(cfg, options);
   //Url encode the data
-  if (data !== '') {
-    options.path += escapeParameter(data);
+  if (cfg.data !== '') {
+    options.path += escapeParameter(cfg.data);
   }
-  //Call the pre process method if there is one
-  if (isFunction(__context.preRequest)) {
-    __context.preRequest(options);
-  }
-  options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
-  logger.debug("Request Options", options);
-  logger.debug("Calling:[" + options.method + "] http://" + options.hostname + ":" + options.port + options.path);
-  var report = {
-      startedAt: (new Date()).getTime(),
-      step: __steps[__stepIndex],
-      messages:[]
-    }
-    // Set up the request
-  var get_req = http.request(options, function(response) {
-    response.setEncoding('utf8');
-    var resData = "";
-    response.on('data', function(chunk) {
-      resData += chunk;
-    });
-    response.on('end', function() {
-      handleResponse(options, cfg, resData, report, callback, response);
-    });
+  // Set up the request
+  var get_req = getProtocol().request(options, function(response) {
+    responseHandler(response, options, cfg, report, callback)
   });
-  logger.debug("Requested at:" + report.startedAt);
-  logger.debug("Request Data:" + data);
   get_req.end();
 }
 
@@ -198,7 +202,7 @@ handleResponse = function(options, cfg, chunk, report, callback, server_response
   //Store the session
   __session = __context.getSession(server_response, cleaned);
   //report.messages=_.flatten(report.messages.push(checker.checkResponse(cleaned, report.checks)));
-  report.messages=checker.checkResponse(cleaned, report.step.checks);
+  report.messages = checker.checkResponse(cleaned, report.step.checks);
   //there is no error we can store the result
   __data[cfg.name] = cleaned;
   if (callback) {

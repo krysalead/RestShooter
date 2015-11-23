@@ -11,7 +11,7 @@
 				"test":"exist"
 			},{
 				"path":"name",
-				"test":"paris"
+				"test":"Paris"
 			}]
 		}
 	]

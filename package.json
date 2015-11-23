@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "chalk": "^1.1.1",
+    "cli-spinner": "^0.2.1",
+    "https": "^1.0.0",
     "lodash": "^3.10.1",
     "xml2js": "0.4.4"
   },

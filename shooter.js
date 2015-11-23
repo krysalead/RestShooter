@@ -16,6 +16,7 @@ os = require('os');
 __config = {
   baseUrl: '',
   port: 80,
+  protocol: 'http',
   method: 'GET'
 };
 //The list of tests to run
@@ -46,7 +47,8 @@ setUp = function(cfg, conffile) {
   if (!isFunction(cfg.setSession)) {
     cfg.setSession = setSession;
   }
-  __config = cfg;
+
+  __config = _.merge(__config, cfg);
   logger.debug("--------------------");
   logger.debug("Running on: " + os.platform() + "-" + path.sep);
   logger.debug("Server:" + __config.server);

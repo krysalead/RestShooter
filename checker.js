@@ -1,8 +1,9 @@
 /**
  * Checker.js This object is validating the request, based on the instruction of the steps and scenario
  */
-util = require('util');
-assert = require('assert');
+var util = require('util');
+var assert = require('assert');
+var logger = require('./logger.js');
 
 var __context = {};
 /**
