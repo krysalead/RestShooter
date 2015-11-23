@@ -156,11 +156,22 @@ exports.writeResponse = function(file, content) {
 
 writeResult = function(result) {
   writeLine(result.step.name);
-  writeLine("=============");
-  for (var i = 0; i < result.messages.length; i++) {
-    writeLine(result.messages[i] === '' ? "Passed" : result.messages[i]);
+  writeLine(JSON.stringify(result));
+  if (result.messages.length > 0) {
+    for (var i = 0; i < result.messages.length; i++) {
+      writeLine(result.messages[i]);
+    }
+  } else {
+    writeLine(result.step.url + " => Passed" + "[" + formatDuration(result.endedAt, result.startedAt) + "]");
   }
   writeLine("=============");
+}
+
+formatDuration = function(end, start) {
+  var duration = end - start;
+  second = Math.floor(duration / 1000);
+  milisecond = duration - second * 1000;
+  return second + "s" + milisecond + "ms"
 }
 
 writeLine = function(line) {
