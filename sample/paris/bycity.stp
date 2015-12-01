@@ -1,7 +1,7 @@
 {
   "name":"ByCity",
   "extend":"../common/ByCity",
-  "data":"?q=Paris,fr",
+  "data":"q=Paris,fr",
   "checks":[{
     "path":"name",
     "test":"exist|Paris"

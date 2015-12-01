@@ -5,7 +5,7 @@
 			"name":"bycityid",
 			"url":"weather",
 			"method":"GET",
-			"data":"?id=${ByCity.id}",
+			"data":"id=${ByCity.id}",
 			"checks":[{
 				"path":"weather",
 				"test":"exist"

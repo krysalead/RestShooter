@@ -105,9 +105,9 @@ getStepVariableName = function(key) {
 
 logOptions = function(cfg, options) {
   logger.debug("Request Options", options);
+  logger.debug("Request Data:" + cfg.data);
   logger.debug("Calling:[" + options.method + "] " + __context.protocol + "://" + options.hostname + ":" + options.port +
-    options.path +
-    (options.commonParam ? options.commonParam : ""));
+    options.path);
 }
 
 responseHandler = function(response, options, cfg, report, callback) {
@@ -128,8 +128,8 @@ preRequest = function(cfg, options) {
   if (isFunction(__context.preRequest)) {
     __context.preRequest(options);
   }
-  options.path += __context.params ? options.path.indexOf("=") > -1 ? "&" + __context.params : __context.params : "";
-  logOptions(cfg, options);
+  //Build default param
+  options.path += __context.params ? injecParameters(options.path,__context.params): "";
   var spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('|/-\\');
   var report = {
@@ -140,19 +140,27 @@ preRequest = function(cfg, options) {
     }
     // post the data
   logger.debug("Requested at:" + report.startedAt);
-  logger.debug("Request Data:" + cfg.data);
   spinner.start();
   return report;
 }
 
 getProtocol = function() {
-  return __context.protocol.toUpperCase === "HTTP" ? http : https;
+  logger.debug("Protocol to use: "+(__context.protocol.toUpperCase() === "HTTP"?"HTTP":"HTTPS"));
+  return __context.protocol.toUpperCase() === "HTTP" ? http : https;
+}
+
+injecParameters = function(path,params){
+  var requestparam = (path.indexOf("?")==   -1 ? "?":"");
+  requestparam += (path.indexOf("=")>   -1 ? "&":"");
+  requestparam +=params;
+  return requestparam;
 }
 
 runPost = function(cfg, options, checks, callback) {
   //Prepare the request, modify the options and configuration, log information and time
   var report = preRequest(cfg, options);
   options.headers['Content-Length'] = cfg.data.length;
+  logOptions(cfg, options);
   // Set up the request
   var post_req = getProtocol().request(options, function(response) {
     responseHandler(response, options, cfg, report, callback)
@@ -166,8 +174,9 @@ runGet = function(cfg, options, checks, callback) {
   var report = preRequest(cfg, options);
   //Url encode the data
   if (cfg.data !== '') {
-    options.path += escapeParameter(cfg.data);
+    options.path += injecParameters(options.path,escapeParameter(cfg.data));
   }
+  logOptions(cfg, options);
   // Set up the request
   var get_req = getProtocol().request(options, function(response) {
     responseHandler(response, options, cfg, report, callback)
@@ -187,7 +196,7 @@ escapeParameter = function(data) {
     var p = params[i].split("=");
     params[i] = p[0] + "=" + querystring.escape(p[1]);
   }
-  return arr[0] + "?" + params;
+  return params;
 }
 
 handleResponse = function(options, cfg, chunk, report, callback, server_response) {

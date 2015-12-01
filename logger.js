@@ -132,7 +132,7 @@ print_messages = function(result) {
   for (var i = 0; i < result.length; i++) {
     for (var j = 0; j < result[i].length; j++) {
       for (var k = 0; k < result[i][j].messages.length; k++) {
-        this.error(result[i][j].step.name + "-" + result[i][j].messages[k]);
+        exports.error(result[i][j].step.name + "-" + result[i][j].messages[k]);
       }
     }
   }
