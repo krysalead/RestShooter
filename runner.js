@@ -1,3 +1,4 @@
+/*globals exports:false, __config:false*/
 /**
  * runner.js This file is the one that call the targeted server. It call then the checker to verify the response
  */
@@ -7,7 +8,7 @@ var querystring = require("querystring");
 var xmlParser = require('xml2js').parseString;
 var checker = require('./checker.js');
 var logger = require('./logger.js');
-var _ = require('lodash');
+//var _ = require('lodash');
 var Spinner = require('cli-spinner').Spinner;
 
 var __context = {};
@@ -17,6 +18,7 @@ var __checks = [];
 var __ran = [];
 var __data = [];
 var __session = '';
+var __endCallback = null;
 //Not needed __config is available
 exports.setContext = function(context) {
   __context = context;
@@ -35,10 +37,10 @@ exports.setContext = function(context) {
 
 function parseJson(data, server_response) {
   logger.debug("Automatic JSON parsing");
-  return JSON.parse(data);
+  return JSON.parse(data.replace(/\t|\n|\r/g, ''));
 }
 
-function parseXML(data, server_response) {
+function parseXML(data, server_response, callback) {
   logger.debug("Automatic XML parsing");
   xmlParser(data, function(err, result) {
     callback.call({
@@ -59,7 +61,7 @@ function isFunction(object) {
  *          cfg
  * @return {}
  */
-getOption = function(cfg) {
+var getOption = function(cfg) {
   var opt = {
     hostname: __config.server,
     port: __config.port,
@@ -71,7 +73,7 @@ getOption = function(cfg) {
     }
   };
   return opt;
-}
+};
 
 /**
  * This method replace the variable ${} into the data passed in parameter according to the current content of the
@@ -81,7 +83,7 @@ getOption = function(cfg) {
  *          data
  * @return {String} processed data
  */
-processData = function(data) {
+var processData = function(data) {
   if (data === undefined) {
     return "";
   }
@@ -97,20 +99,20 @@ processData = function(data) {
   }
   logger.debug("Processed " + d);
   return d;
-}
+};
 
-getStepVariableName = function(key) {
+var getStepVariableName = function(key) {
   return key.split(".").shift();
-}
+};
 
-logOptions = function(cfg, options) {
+var logOptions = function(cfg, options) {
   logger.debug("Request Options", options);
   logger.debug("Request Data:" + cfg.data);
   logger.debug("Calling:[" + options.method + "] " + __context.protocol + "://" + options.hostname + ":" + options.port +
     options.path);
-}
+};
 
-responseHandler = function(response, options, cfg, report, callback) {
+var responseHandler = function(response, options, cfg, report, callback) {
   response.setEncoding('utf8');
   var resData = "";
   response.on('data', function(chunk) {
@@ -119,10 +121,10 @@ responseHandler = function(response, options, cfg, report, callback) {
   response.on('end', function() {
     report.spinner.stop();
     handleResponse(options.url, cfg, resData, report, callback, response);
-  })
-}
+  });
+};
 
-preRequest = function(cfg, options) {
+var preRequest = function(cfg, options) {
   cfg.data = processData(cfg.data);
   //Call the pre process method if there is one
   if (isFunction(__context.preRequest)) {
@@ -133,44 +135,44 @@ preRequest = function(cfg, options) {
   var spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('|/-\\');
   var report = {
-      startedAt: (new Date()).getTime(),
-      step: __steps[__stepIndex],
-      messages: [],
-      spinner: spinner
-    }
-    // post the data
+    startedAt: (new Date()).getTime(),
+    step: __steps[__stepIndex],
+    messages: [],
+    spinner: spinner
+  };
+  // post the data
   logger.debug("Requested at:" + report.startedAt);
   spinner.start();
   return report;
-}
+};
 
-getProtocol = function() {
+var getProtocol = function() {
   logger.debug("Protocol to use: " + (__context.protocol.toUpperCase() === "HTTP" ? "HTTP" : "HTTPS"));
   return __context.protocol.toUpperCase() === "HTTP" ? http : https;
-}
+};
 
-injecParameters = function(path, params) {
+var injecParameters = function(path, params) {
   var requestparam = (path.indexOf("?") == -1 ? "?" : "");
   requestparam += (path.indexOf("=") > -1 ? "&" : "");
   requestparam += params;
   return requestparam;
-}
+};
 
-runPost = function(cfg, options, checks, callback) {
+var runPost = function(cfg, options, checks, callback) {
   //Prepare the request, modify the options and configuration, log information and time
   var report = preRequest(cfg, options);
   options.headers['Content-Length'] = cfg.data.length;
   logOptions(cfg, options);
   // Set up the request
   var post_req = getProtocol().request(options, function(response) {
-    responseHandler(response, options, cfg, report, callback)
+    responseHandler(response, options, cfg, report, callback);
   });
   post_req.write(cfg.data + "\n");
   post_req.end();
 
-}
+};
 
-runGet = function(cfg, options, checks, callback) {
+var runGet = function(cfg, options, checks, callback) {
   var report = preRequest(cfg, options);
   //Url encode the data
   if (cfg.data !== '') {
@@ -179,15 +181,15 @@ runGet = function(cfg, options, checks, callback) {
   logOptions(cfg, options);
   // Set up the request
   var get_req = getProtocol().request(options, function(response) {
-    responseHandler(response, options, cfg, report, callback)
+    responseHandler(response, options, cfg, report, callback);
   });
   get_req.end();
-}
+};
 
 /**
  * Escape only the value of the parameter and not the parameter so it splits the data as an array
  */
-escapeParameter = function(data) {
+var escapeParameter = function(data) {
   //TODO : case of the path based parameter with no ? and &
   var arr = data.split("?");
   var index = arr.length > 1 ? 1 : 0;
@@ -197,9 +199,9 @@ escapeParameter = function(data) {
     params[i] = p[0] + "=" + querystring.escape(p[1]);
   }
   return params;
-}
+};
 
-handleResponse = function(options, cfg, chunk, report, callback, server_response) {
+var handleResponse = function(options, cfg, chunk, report, callback, server_response) {
   report.endedAt = (new Date()).getTime();
   logger.store(chunk, cfg.name + ".rs");
   var cleaned = chunk;
@@ -217,13 +219,13 @@ handleResponse = function(options, cfg, chunk, report, callback, server_response
   if (callback) {
     callback(report);
   }
-}
+};
 
-nextStep = function(report) {
+var nextStep = function(report) {
   if (report) {
     __ran.push(report);
   }
-  __stepIndex++
+  __stepIndex++;
   if (__steps.length > __stepIndex && (report == undefined || report.messages == undefined || report.messages.length ==
       0)) {
     var cfg = __steps[__stepIndex];
@@ -249,7 +251,7 @@ nextStep = function(report) {
     }
   }
 
-}
+};
 
 /**
  * Entry point of the runner It will process all the steps passed un parameter and apply all the common checks, then it
@@ -264,10 +266,10 @@ nextStep = function(report) {
  */
 exports.run = function(steps, checks, endCallback) {
   __stepIndex = -1;
-  __ran = []
+  __ran = [];
   __steps = steps;
-  __checks = checks
+  __checks = checks;
   __endCallback = endCallback;
   __data = [];
   nextStep();
-}
+};
