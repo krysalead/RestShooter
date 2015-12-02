@@ -5,7 +5,7 @@ Rest Shooter is a node module able to take a list of scenario of URLs to call an
 A Scenario is a list of steps, a step is a URL with parameter and checks (optional)
 
 
-* Run HTTP only
+* Run HTTP and HTTPS
 * Run POST and GET
 * Check global field for a scenario
 * Check specific field for a step
@@ -46,6 +46,7 @@ First we have to define the configuration, one per platform to target. Lets call
 	"server":"localhost",
 	"port":9091,
 	"baseUrl":"/rest",
+	"protocol":"https",
 	"scenario":[
 		"login.scn"
 	],
@@ -80,6 +81,8 @@ First we have to define the configuration, one per platform to target. Lets call
 **debug** If set to true it will output more information on the console.
 
 **content** is the content type received.
+
+**protocol** Use this property to target your server in HTTP or HTTPS, becareful to use the right port (see know issue section)
 
 First Step
 ----------
@@ -195,6 +198,18 @@ So the system will replace the variable by the value from the previous request a
 
 **user.ref** is the path to the variable in the JSON returned by the previous script
 
+Hooks
+--------------
+
+You can add hooks preRequest and postRequest that last will override the default parsing so you must do a parsing in addition to other code.
+You can also do some reference to libraries, you just have to install them in your node modules folder with npm and then accession like that
+```javascript
+...
+"preRequest":function(){
+	var btoa = require(process.cwd()+'/node_modules/btoa/index.js');
+	console.log(btoa("Pre Request Processing"));
+}
+```
 
 Known Issues
 --------------
@@ -204,3 +219,6 @@ On OSX we have to link node installation as it is in linux system.
 ```bash
 sudo ln -s /usr/local/bin/node /usr/bin/node
 ```
+
+You can get this error : SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+Check that you specify the right port (443 instead of 80) 

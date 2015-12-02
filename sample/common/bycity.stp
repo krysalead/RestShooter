@@ -13,7 +13,7 @@
             "test": 200
         }
     ],
-    "data": "?q=London,uk",
+    "data": "q=London,uk",
     "method": "GET",
     "name": "ByCity",
     "url": "weather"
