@@ -6,7 +6,7 @@ A Scenario is a list of steps, a step is a URL with parameter and checks (option
 
 
 * Run HTTP and HTTPS
-* Run POST and GET
+* Run POST,GET,DELETE,PUT
 * Check global field for a scenario
 * Check specific field for a step
 * Support only JSON and XML
@@ -221,4 +221,4 @@ sudo ln -s /usr/local/bin/node /usr/bin/node
 ```
 
 You can get this error : SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
-Check that you specify the right port (443 instead of 80) 
+Check that you specify the right port (443 instead of 80)
