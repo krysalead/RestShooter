@@ -51,7 +51,7 @@ First we have to define the configuration, one per platform to target. Lets call
 		"login.scn"
 	],
 	"content":"JSON",
-	"getSession":function(data,response){},
+	"getSession":function(response,data){},
 	"setSession":function(requestHeaderOptions,stepConfig,previousSession){},
 	"preRequest":function(options){},
 	"postRequest":function(response,data){},
@@ -74,6 +74,18 @@ First we have to define the configuration, one per platform to target. Lets call
 
 **preRequest** (optional) JavaScript function that allows to performe some changed in the request options before sending.
 
+options Object:
+
+```javascript
+{
+    hostname:
+    port:
+    path:
+    method:
+    headers: {}
+}
+```
+
 **postRequest** (optional) JavaScript function that allows to clean up the response data or parse it if needed. It should returned a cleaned JSON version of the data.
 
 **Report** is the file where is report will be written at the end of the test
@@ -83,6 +95,7 @@ First we have to define the configuration, one per platform to target. Lets call
 **content** is the content type received.
 
 **protocol** Use this property to target your server in HTTP or HTTPS, becareful to use the right port (see know issue section)
+
 
 First Step
 ----------
@@ -210,6 +223,7 @@ You can also do some reference to libraries, you just have to install them in yo
 	console.log(btoa("Pre Request Processing"));
 }
 ```
+Note that you can install globally and it will work using simply __require('btoa');__
 
 Known Issues
 --------------

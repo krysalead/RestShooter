@@ -73,8 +73,9 @@ setSession = function(options, stepConfig, previousSession) {
 it must be returned to be shared accross the requests
 */
 getSession = function(response, data) {
-  var cookies = response.headers['Cookie'] ? response.headers['Cookie'] : [];
-  session = cookies['PHPSESSID'] ? cookies['PHPSESSID'] : cookies['JSESSIONID'] ? cookies['JSESSIONID'] : "";
+  var cookies = response.headers['Cookie'] ? response.headers['Cookie'] ? response.headers['Cookie'] : response.headers[
+    'Set-Cookie'] : [];
+  var session = cookies['PHPSESSID'] ? cookies['PHPSESSID'] : cookies['JSESSIONID'] ? cookies['JSESSIONID'] : "";
   return session;
 }
 
