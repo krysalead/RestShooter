@@ -51,11 +51,12 @@ First we have to define the configuration, one per platform to target. Lets call
 		"login.scn"
 	],
 	"content":"JSON",
-	"getSession":function(response,data){},
-	"setSession":function(requestHeaderOptions,stepConfig,previousSession){},
-	"preRequest":function(options){},
-	"postRequest":function(response,data){},
+	"getSession":function(response,data,stepConfig){},
+	"setSession":function(requestOptions,stepConfig,previousSession){},
+	"preRequest":function(requestOptions,stepConfig){},
+	"postRequest":function(response,data,stepConfig){},
 	"report":"myreport.log",
+	"parseInput":function(data,stepConfig){},
 	"debug":true
 }
 ```
@@ -74,7 +75,7 @@ First we have to define the configuration, one per platform to target. Lets call
 
 **preRequest** (optional) JavaScript function that allows to performe some changed in the request options before sending.
 
-options Object:
+requestOptions Object:
 
 ```javascript
 {
@@ -90,12 +91,17 @@ options Object:
 
 **Report** is the file where is report will be written at the end of the test
 
-**debug** If set to true it will output more information on the console.
+**debug** (optional) If set to true it will output more information on the console.
 
 **content** is the content type received.
 
 **protocol** Use this property to target your server in HTTP or HTTPS, becareful to use the right port (see know issue section)
 
+**parseInput** function that will format the input parameter of a step into a JSON, this will allow to reuse the input parameter across all the steps with the following syntax
+
+```
+&q=${in.ByCity.q}
+```
 
 First Step
 ----------
@@ -128,6 +134,14 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
   * **path** is the path into the JSON returned to be checked (ie `{response:{answer:ok}}`).
   * **test** this is a set of test for a node like exist or notempty separated by a `|`.
+
+**preRequest** can be setup at step level and will have the same signature as the global one, it will be called after the global.
+
+**postRequest** can be setup at step level and will have the same signature as the global one, it will be called after the global but will have the priority to the global.
+
+**getSession** can be setup at step level and will have the same signature as the global one, it will be called after the global but will have the priority to the global.
+
+**setSession** can be setup at step level and will have the same signature as the global one, it will be called after the global.
 
 Here after the list of test:
 

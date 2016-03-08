@@ -1,9 +1,13 @@
 {
   "name":"ByCity",
-  "extend":"../common/ByCity",
+  "description":"Fetching the city name",
+  "extend":"../common/bycity",
   "data":"q=Paris,fr",
   "checks":[{
     "path":"name",
     "test":"exist|Paris"
-  }]
+  }],
+  "preRequest":function(request){
+    console.log(request);
+  }
 }

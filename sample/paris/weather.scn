@@ -1,11 +1,12 @@
 {
 	"name":"WeatherAtParis",
+	"description":"It will fetch the weather for paris",
 	"steps":[
 		"bycity.stp",{
 			"name":"bycityid",
 			"url":"weather",
 			"method":"GET",
-			"data":"?id=${ByCity.id}",
+			"data":"?id=${ByCity.id}&q=${in.ByCity.q}",
 			"checks":[{
 				"path":"weather",
 				"test":"exist"

@@ -61,7 +61,7 @@ exports.debug = function(message, data) {
  *          data
  */
 exports.info = function(message, data) {
-  console.info(chalk.blue("[INFO]" + getTimeStamp() + " " + message));
+  console.info(chalk.cyan("[INFO]" + getTimeStamp() + " " + message));
   if (data != undefined) {
     //console.info("[INFO]"+getTimeStamp());
     console.info(data);
