@@ -4,7 +4,9 @@
  */
 var fs = require("fs");
 var util = require('util');
-var chalk = require('chalk')
+var chalk = require('chalk');
+var mkdirp = require('mkdirp');
+var path = require('path');
 
 var __context = {};
 exports.setContext = function(context) {
@@ -125,6 +127,9 @@ getNumberOfSteps = function(result) {
  */
 exports.store = function(data, file) {
   this.debug("Response data in: " + file);
+  var p = file.split(path.sep);
+  p.pop();
+  mkdirp(path.join.apply(path,p));
   fs.writeFileSync(file, data);
 }
 

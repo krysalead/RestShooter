@@ -4,6 +4,7 @@
  */
 var http = require('http');
 var https = require('https');
+var path = require('path');
 var querystring = require("querystring");
 var checker = require('./checker.js');
 var logger = require('./logger.js');
@@ -234,7 +235,7 @@ var escapeParameter = function (data) {
  */
 var handleResponse = function (options, cfg, chunk, report, callback, server_response) {
   report.endedAt = (new Date()).getTime();
-  logger.store(chunk, cfg.name + ".rs");
+  logger.store(chunk, path.join("report",cfg.name + ".rs"));
   var cleaned = chunk;
   cleaned = callHook(__context.postRequest, [chunk, server_response, cfg], cfg, "postRequest");
   cleanedFromStep = callHook(cfg.postRequest, [chunk, server_response, cfg], cfg, "Step postRequest");
