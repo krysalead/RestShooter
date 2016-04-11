@@ -86,7 +86,7 @@ exports.checkResponse = function(response, checks) {
         var msg = null;
         switch (tst) {
           case 'notexist':
-            if (node === undefined) {
+            if (node !== undefined) {
               msg = "The " + checks[i].path + " must not exist in the answer";
             }
             break;
