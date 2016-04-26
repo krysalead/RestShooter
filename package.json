@@ -26,16 +26,29 @@
     "POST",
     "GET",
     "Test",
-    "Integration"
+    "Integration",
+    "end2end",
+    "end to end test",
+    "e2e test"
   ],
   "preferGlobal": true,
   "bin": {
-    "restshooter": "shooter.js"
+    "restshooter": "src/shooter.js"
   },
   "author": "Olivier DAUMAS",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/krysalead/RestShooter/issues"
   },
-  "homepage": "https://github.com/krysalead/RestShooter"
+  "homepage": "https://github.com/krysalead/RestShooter",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-browserify": "^5.0.4",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-jasmine": "^0.3.8",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "watchify": "^3.7.0"
+  }
 }

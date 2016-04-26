@@ -270,8 +270,8 @@ __loadTest = function(fileName) {
 };
 
 if (process.argv[2] == undefined) {
-  logger.log("You must pass the configuration");
-  logger.log("restshooter config.cfg");
+  logger.error("You must pass the configuration");
+  logger.error("restshooter config.cfg");
 } else {
   configfile = process.argv[2];
   logger.info("Reading config file: " + configfile);

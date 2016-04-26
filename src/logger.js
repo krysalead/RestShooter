@@ -155,10 +155,6 @@ getFailNumber = function(result) {
   return count;
 }
 
-exports.writeResponse = function(file, content) {
-  fs.appendFileSync(file, content);
-}
-
 writeResult = function(result) {
   writeLine(result.step.name);
   writeLine(JSON.stringify(result));

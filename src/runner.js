@@ -55,7 +55,7 @@ var getOption = function (cfg) {
  *          data
  * @return {String} processed data
  */
-var processData = function (data) {
+exports.processData = function (data) {
   if (data === undefined) {
     return "";
   }

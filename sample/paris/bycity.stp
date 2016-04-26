@@ -6,6 +6,9 @@
   "checks":[{
     "path":"name",
     "test":"exist|Paris"
+  },{
+  "path":"../../ref/bycity.json",
+  "test":"struct"
   }],
   "preRequest":function(request){
     console.log(request);
