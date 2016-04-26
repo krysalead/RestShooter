@@ -145,14 +145,15 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
 Here after the list of test:
 
-| Name          | Behavior                                                 |
-| ------------- |----------------------------------------------------------|
-| notexist      | Fail if the node is existing in the answer               |
-| exist         | Fail if the node is not existing in the answer           |
-| existnotnull  | Fail if the node is existing but null                    |
-| notempty      | Fail if the node is string empty or null                 |
-| empty         | Fail if the node is string not empty                     |
-| default       | All value not listed above will be value comparison      |
+| Name          | Behavior                                                                                                       |
+| ------------- |----------------------------------------------------------------------------------------------------------------|
+| notexist      | Fail if the node is existing in the answer                                                                     |
+| exist         | Fail if the node is not existing in the answer                                                                 |
+| existnotnull  | Fail if the node is existing but null                                                                          |
+| notempty      | Fail if the node is string empty or null                                                                       |
+| empty         | Fail if the node is string not empty                                                                           |
+| struct        | Fail if the json response is not structurly the same as the reference (path contains the path to the reference)|
+| default       | All value not listed above will be value comparison                                                            |
 
 
 Second Step
@@ -238,6 +239,13 @@ You can also do some reference to libraries, you just have to install them in yo
 }
 ```
 Note that you can install globally and it will work using simply __require('btoa');__
+
+Unit test
+--------------
+
+```bash
+karma start karma.conf.js
+```
 
 Known Issues
 --------------
