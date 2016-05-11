@@ -7,7 +7,7 @@
     "path":"name",
     "test":"exist|Paris"
   },{
-  "path":"../../ref/bycity.json",
+  "path":"ref/bycity.json",
   "test":"struct"
   }],
   "preRequest":function(request){

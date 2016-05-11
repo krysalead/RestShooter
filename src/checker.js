@@ -2,6 +2,8 @@
  * Checker.js This object is validating the request, based on the instruction of the steps and scenario
  */
 var logger = require('./logger.js');
+var _path = require('path');
+var fs = require('fs');
 
 var __context = {};
 /**
@@ -117,7 +119,9 @@ exports.compareJSONKeys = function(json1, json2) {
 };
 
 exports.getJsonFromFile= function(path){
-  return JSON.parse(require(path));
+  var updatedPath = _path.join.apply(_path,[__context.root,path]);
+  var data = fs.readFileSync(updatedPath, 'utf-8');
+  return JSON.parse(data);
 }
 
 /**
