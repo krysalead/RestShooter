@@ -3,3 +3,4 @@ tests/
 *.log
 dist/
 bin/
+tmp/
