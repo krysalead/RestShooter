@@ -9,7 +9,7 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 
 var __context = {};
-exports.setContext = function(context) {
+exports.setContext = function (context) {
   __context = context;
   if (__context.report && fs.existsSync(__context.report)) {
     //Remove the file create at the previous build
@@ -17,7 +17,7 @@ exports.setContext = function(context) {
   }
 };
 
-getTimeStamp = function() {
+getTimeStamp = function () {
   var d = new Date();
   var ts = [];
   ts.push("[");
@@ -44,7 +44,7 @@ getTimeStamp = function() {
  * @param {Object}
  *          data
  */
-exports.debug = function(message, data) {
+exports.debug = function (message, data) {
   if (__context.debug) {
     console.log("[DEBUG]" + getTimeStamp() + " " + message);
     if (data != undefined) {
@@ -62,7 +62,7 @@ exports.debug = function(message, data) {
  * @param {Object}
  *          data
  */
-exports.info = function(message, data) {
+exports.info = function (message, data) {
   console.info(chalk.cyan("[INFO]" + getTimeStamp() + " " + message));
   if (data != undefined) {
     //console.info("[INFO]"+getTimeStamp());
@@ -78,7 +78,7 @@ exports.info = function(message, data) {
  * @param {Object}
  *          data
  */
-exports.error = function(message, data) {
+exports.error = function (message, data) {
   console.error(chalk.red("[ERROR]" + getTimeStamp() + " " + message));
   if (data != undefined) {
     console.error(data);
@@ -91,7 +91,7 @@ exports.error = function(message, data) {
  * @param {Array}
  *          result the result of the tests for each scenario and each step
  */
-exports.writeReport = function(result) {
+exports.writeReport = function (result) {
   var failed = getFailNumber(result);
   var __print = chalk.green;
   if (failed > 0) {
@@ -114,7 +114,7 @@ exports.writeReport = function(result) {
   }
 }
 
-getNumberOfSteps = function(result) {
+getNumberOfSteps = function (result) {
   var count = 0;
   for (var i = 0; i < result.length; i++) {
     count += result[i].length;
@@ -125,15 +125,15 @@ getNumberOfSteps = function(result) {
 /**
  * Store in a file the data passed in parameter
  */
-exports.store = function(data, file) {
+exports.store = function (data, file) {
   this.debug("Response data in: " + file);
   var p = file.split(path.sep);
   p.pop();
-  mkdirp.sync(path.join.apply(path,p));
+  mkdirp.sync(path.join.apply(path, p));
   fs.writeFileSync(file, data);
 }
 
-print_messages = function(result) {
+print_messages = function (result) {
   for (var i = 0; i < result.length; i++) {
     for (var j = 0; j < result[i].length; j++) {
       for (var k = 0; k < result[i][j].messages.length; k++) {
@@ -143,7 +143,7 @@ print_messages = function(result) {
   }
 }
 
-getFailNumber = function(result) {
+getFailNumber = function (result) {
   var count = 0;
   for (var i = 0; i < result.length; i++) {
     for (var j = 0; j < result[i].length; j++) {
@@ -155,9 +155,8 @@ getFailNumber = function(result) {
   return count;
 }
 
-writeResult = function(result) {
+writeResult = function (result) {
   writeLine(result.step.name);
-  writeLine(JSON.stringify(result));
   if (result.messages.length > 0) {
     for (var i = 0; i < result.messages.length; i++) {
       writeLine(result.messages[i]);
@@ -168,14 +167,14 @@ writeResult = function(result) {
   writeLine("=============");
 }
 
-formatDuration = function(end, start) {
+formatDuration = function (end, start) {
   var duration = end - start;
   second = Math.floor(duration / 1000);
   milisecond = duration - second * 1000;
   return second + "s" + milisecond + "ms"
 }
 
-writeLine = function(line) {
+writeLine = function (line) {
   if (__context.report) {
     if (fs.existsSync(__context.report)) {
       fs.appendFileSync(__context.report, line + "\n");

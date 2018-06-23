@@ -1,44 +1,41 @@
-RestShooter
-===========
+# RestShooter
 
 Rest Shooter is a node module able to take a list of scenario of URLs to call and check the response.
 A Scenario is a list of steps, a step is a URL with parameter and checks (optional)
 
-
-* Run HTTP and HTTPS
-* Run POST,GET,DELETE,PUT
-* Check global field for a scenario
-* Check specific field for a step
-* Support only JSON and XML
-* Allows to propagate a session along a scenario
-* Allows to hook on request
+- Run HTTP and HTTPS
+- Run POST,GET,DELETE,PUT
+- Check global field for a scenario
+- Check specific field for a step
+- Support only JSON and XML
+- Allows to propagate a session along a scenario
+- Allows to hook on request
 
 By default Session is retrieved from the cookie and store in the cookie as:
-* JSESSIONID (J2EE)
-* PHPSESSID (PHP)
+
+- JSESSIONID (J2EE)
+- PHPSESSID (PHP)
 
 (Contact me if you want me to put other default id)
 
-How to use it
-=============
+# How to use it
 
-Installation
-------------------
+## Installation
+
 ```bash
 npm install -g restshooter
 ```
 
-Sample Project
-------------------
+## Sample Project
 
 Checkout the sample folder. You can run from this folder
+
 ```bash
 restshooter weather.cfg
 ```
 
+## Configuration file
 
-Configuration file
-------------------
 First we have to define the configuration, one per platform to target. Lets call it integration.cfg
 
 ```javascript
@@ -51,7 +48,7 @@ First we have to define the configuration, one per platform to target. Lets call
 		"login.scn"
 	],
 	"content":"JSON",
-	"getSession":function(response,data,stepConfig){},
+	"getSession":function(response,data,stepConfig,previousSession){},
 	"setSession":function(requestOptions,stepConfig,previousSession){},
 	"preRequest":function(requestOptions,stepConfig){},
 	"postRequest":function(response,data,stepConfig){},
@@ -69,7 +66,7 @@ First we have to define the configuration, one per platform to target. Lets call
 
 **scenario** is an array of scenario to run, files that will be loaded independently
 
-**getSession** (optional) JavaScript function that allows to extract the session from the server response, it receive the data and the [response](http://nodejs.org/api/http.html#http_http_incomingmessage)
+**getSession** (optional) JavaScript function that allows to extract the session from the server response, it receive the data and the [response](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
 
 **setSession** JavaScript function that allows to set the session in the header request options (Cookie), the step config (URL parameter for instance) and also the previous session so it can be propagated
 
@@ -79,11 +76,8 @@ requestOptions Object:
 
 ```javascript
 {
-    hostname:
-    port:
-    path:
-    method:
-    headers: {}
+  hostname: port: path: method: headers: {
+  }
 }
 ```
 
@@ -103,8 +97,7 @@ requestOptions Object:
 &q=${in.ByCity.q}
 ```
 
-First Step
-----------
+## First Step
 
 You need to create file, by convention we will give it an '.stp' extension. The following exemple is for a login which must be reusable so it is the first one to create as a step. Lets call it login.stp.
 
@@ -120,6 +113,7 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 	}]
 }
 ```
+
 **name** will be used in report and error to help investigation must be unique per step.
 
 **url** will be added to the base url previously presented in the configuration.
@@ -132,8 +126,8 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
 **checks** is a list of checks to perform once the response is coming back from the server.
 
-  * **path** is the path into the JSON returned to be checked (ie `{response:{answer:ok}}`).
-  * **test** this is a set of test for a node like exist or notempty separated by a `|`.
+- **path** is the path into the JSON returned to be checked (ie `{response:{answer:ok}}`).
+- **test** this is a set of test for a node like exist or notempty separated by a `|`.
 
 **preRequest** can be setup at step level and will have the same signature as the global one, it will be called after the global.
 
@@ -145,19 +139,17 @@ You need to create file, by convention we will give it an '.stp' extension. The 
 
 Here after the list of test:
 
-| Name          | Behavior                                                                                                       |
-| ------------- |----------------------------------------------------------------------------------------------------------------|
-| notexist      | Fail if the node is existing in the answer                                                                     |
-| exist         | Fail if the node is not existing in the answer                                                                 |
-| existnotnull  | Fail if the node is existing but null                                                                          |
-| notempty      | Fail if the node is string empty or null                                                                       |
-| empty         | Fail if the node is string not empty                                                                           |
-| struct        | Fail if the json response is not structurly the same as the reference (path contains the path to the reference)|
-| default       | All value not listed above will be value comparison                                                            |
+| Name         | Behavior                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| notexist     | Fail if the node is existing in the answer                                                                      |
+| exist        | Fail if the node is not existing in the answer                                                                  |
+| existnotnull | Fail if the node is existing but null                                                                           |
+| notempty     | Fail if the node is string empty or null                                                                        |
+| empty        | Fail if the node is string not empty                                                                            |
+| struct       | Fail if the json response is not structurly the same as the reference (path contains the path to the reference) |
+| default      | All value not listed above will be value comparison                                                             |
 
-
-Second Step
-----------
+## Second Step
 
 You need to create a file that represent the scenario. By convention we are using the '.scn' extension. Lets call it login.scn.
 
@@ -177,23 +169,25 @@ You need to create a file that represent the scenario. By convention we are usin
 	}]
 }
 ```
+
 **name** is the identifier of the scenario for the report and the log in the console.
 
 **steps** is the list of the steps to run for the scenario execution.
 
 **checks** is the list of validation to perform on each request.
 
-Run the script
---------------
+## Run the script
+
 ```bash
 restshooter integration.cfg
 ```
 
-Variable Replacement
----------------
+## Variable Replacement
+
 The idea is to take something from the response and to inject into the next request
 
 Imagine that the previous step was the login (name:'login' in the step configuration file) and the answer was something like
+
 ```javascript
 {
 	"user":{
@@ -202,6 +196,7 @@ Imagine that the previous step was the login (name:'login' in the step configura
 	}
 }
 ```
+
 Then in the payload of the next step, lets call it getPreference, I can write something like
 
 ```javascript
@@ -226,11 +221,11 @@ So the system will replace the variable by the value from the previous request a
 
 **user.ref** is the path to the variable in the JSON returned by the previous script
 
-Hooks
---------------
+## Hooks
 
 You can add hooks preRequest and postRequest that last will override the default parsing so you must do a parsing in addition to other code.
 You can also do some reference to libraries, you just have to install them in your node modules folder with npm and then accession like that
+
 ```javascript
 ...
 "preRequest":function(){
@@ -238,17 +233,16 @@ You can also do some reference to libraries, you just have to install them in yo
 	console.log(btoa("Pre Request Processing"));
 }
 ```
-Note that you can install globally and it will work using simply __require('btoa');__
 
-Unit test
---------------
+Note that you can install globally and it will work using simply **require('btoa');**
+
+## Unit test
 
 ```bash
 karma start karma.conf.js
 ```
 
-Known Issues
---------------
+## Known Issues
 
 On OSX we have to link node installation as it is in linux system.
 

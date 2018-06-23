@@ -60,7 +60,7 @@ processData = function (data) {
     return "";
   }
   //treat the output of previous request
-  var R = new RegExp(/\$\{([\[\]0-9a-z\.]*)\}/ig),
+  var R = new RegExp(/\$\{([\[\]0-9a-z\._]*)\}/ig),
     v, d = data;
   while ((v = R.exec(data)) != null) {
     var step = getStepVariableName(v[1]);
@@ -110,7 +110,8 @@ var responseHandler = function (response, options, cfg, report, callback) {
   });
   response.on('end', function () {
     report.spinner.stop();
-    handleResponse(options.url, cfg, resData, report, callback, response);
+    console.log();
+    handleResponse(options, cfg, resData, report, callback, response);
   });
 };
 
@@ -235,7 +236,7 @@ var escapeParameter = function (data) {
  */
 var handleResponse = function (options, cfg, chunk, report, callback, server_response) {
   report.endedAt = (new Date()).getTime();
-  logger.store(chunk, path.join("report",cfg.name + ".rs"));
+  logger.store(chunk, path.join("report", cfg.name + ".rs"));
   var cleaned = chunk;
   cleaned = callHook(__context.postRequest, [chunk, server_response, cfg], cfg, "postRequest");
   cleanedFromStep = callHook(cfg.postRequest, [chunk, server_response, cfg], cfg, "Step postRequest");
@@ -246,8 +247,8 @@ var handleResponse = function (options, cfg, chunk, report, callback, server_res
   logger.debug('STATUS: ' + server_response.statusCode);
   logger.debug('HEADERS: ' + JSON.stringify(server_response.headers));
   //Store the session
-  __session = callHook(__context.getSession, [server_response, cleaned, cfg], cfg, "getSession");
-  __sessionFromStep = callHook(cfg.getSession, [server_response, cleaned, cfg], cfg, "Step getSession");
+  __session = callHook(__context.getSession, [server_response, cleaned, cfg, __session], cfg, "getSession");
+  __sessionFromStep = callHook(cfg.getSession, [server_response, cleaned, cfg, __session], cfg, "Step getSession");
 
   //Priority to the step
   __session = __sessionFromStep ? __sessionFromStep : __session;
@@ -270,7 +271,7 @@ var nextStep = function (report) {
   }
   __stepIndex++;
   if (__steps.length > __stepIndex && (report == undefined || report.messages == undefined || report.messages.length ==
-    0)) {
+      0)) {
     var cfg = __steps[__stepIndex];
     var options = getOption(cfg);
     //Call the method to set the session
