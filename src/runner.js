@@ -16,7 +16,7 @@ var __stepIndex = -1;
 var __steps = [];
 var __checks = [];
 var __ran = [];
-var __data = [];
+var __data = {};
 var __input = [];
 var __session = '';
 var __endCallback = null;
@@ -64,6 +64,7 @@ processData = function (data) {
     v, d = data;
   while ((v = R.exec(data)) != null) {
     var step = getStepVariableName(v[1]);
+    logger.debug("Looking for data in step", [v[1], step]);
     var dot = v[1].split(".");
     dot.shift();
     var value = checker.getJsonNode(dot.join("."), __data[step]);
@@ -129,13 +130,13 @@ var callHook = function (func, args, step, type) {
       return func.apply(this, args);
     }
   } catch (e) {
-    logger.error("Hook " + type + " fails on step:" + step.name);
-    logger.error(e);
+    logger.error("Hook " + type + " fails on step:" + step.name, e);
   }
 };
 
 var preRequest = function (cfg, options) {
   cfg.data = processData(cfg.data);
+  options.path = processData(options.path);
   //Call the pre process method if there is one
   callHook(__context.preRequest, [options, cfg], cfg, "Global preRequest");
   //Call the preRequest of the step
@@ -275,8 +276,8 @@ var nextStep = function (report) {
     var cfg = __steps[__stepIndex];
     var options = getOption(cfg);
     //Call the method to set the session
-    callHook(__context.setSession, [options, cfg, __session], cfg, "setSession");
-    callHook(cfg.setSession, [options, cfg, __session], cfg, "Step setSession");
+    callHook(__context.setSession, [options, cfg, __session, __data], cfg, "setSession");
+    callHook(cfg.setSession, [options, cfg, __session, __data], cfg, "Step setSession");
     logger.info("Running Step:" + cfg.name);
     __input[cfg.name] = callHook(__context.parseInput, [cfg.data, cfg], cfg, "parseInput");
 
@@ -310,12 +311,12 @@ var nextStep = function (report) {
  * @param {Function}
  *          endCallback to be called once everything is done
  */
-exports.run = function (steps, checks, endCallback) {
+exports.run = function (steps, checks, endCallback, initialData) {
   __stepIndex = -1;
   __ran = [];
   __steps = steps;
   __checks = checks;
   __endCallback = endCallback;
-  __data = [];
+  __data = initialData || {};
   nextStep();
 };

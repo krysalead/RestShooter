@@ -12,7 +12,7 @@ var __context = {};
  * @param {Object}
  *          context
  */
-exports.setContext = function(context) {
+exports.setContext = function (context) {
   __context = context;
   logger.setContext(context);
 };
@@ -26,7 +26,7 @@ exports.setContext = function(context) {
  *          response it is a JSON object (Not stringified) where the path will be retrieved
  * @return {Object} the value of the node
  */
-exports.getJsonNode = function(path, response) {
+exports.getJsonNode = function (path, response) {
   return getJsonNode(path, response);
 }
 
@@ -39,31 +39,38 @@ exports.getJsonNode = function(path, response) {
  *          response it is a JSON object (Not stringified) where the path will be retrieved
  * @return {Object} the value of the node
  */
-getJsonNode = function(path, response) {
+getJsonNode = function (path, response) {
   logger.debug("getJsonNode ->" + path);
   var dot = path.split('.');
   var o = response;
   try {
     while (dot.length > 0) {
       var key = dot.shift();
+      //Check that it is not an array
       if (key.indexOf('[') != -1) {
+        //Extract the index
         var index = key.substr(key.indexOf('[') + 1, key.indexOf(']') - (key.indexOf('[') + 1));
         key = key.substr(0, key.indexOf('['));
-        o = o[key][index];
+        logger.debug("Getting from array", [key, index]);
+        if (key.length > 0) {
+          o = o[key][index];
+        } else {
+          o = o[index];
+        }
       } else {
-        o = o[key];
+        o = o && o[key];
       }
     }
   } catch (e) {
-
+    logger.error("Extracting the data failed for", e);
   }
   return o;
-}
+};
 
 /**
  * Update the diff value based on current value
  */
-var updateDiff = function(current, _new_) {
+var updateDiff = function (current, _new_) {
   if (_new_ == 0) {
     return current; //nothing to change
   }
@@ -81,8 +88,8 @@ var updateDiff = function(current, _new_) {
 /**
  * Compare json1 with json2 and return 0 if identical, 1 if the json1 contains more keys, -1 if json2 contains more keys, -2 if both have different keys
  */
-exports.compareJSONKeys = function(json1, json2) {
-  var compare = function(_json1_, _json2_) {
+exports.compareJSONKeys = function (json1, json2) {
+  var compare = function (_json1_, _json2_) {
     var result = {
       diff: 0,
       keys_json1: [],
@@ -118,8 +125,8 @@ exports.compareJSONKeys = function(json1, json2) {
   return compare(json1, JSON.parse(JSON.stringify(json2)));
 };
 
-exports.getJsonFromFile= function(path){
-  var updatedPath = _path.join.apply(_path,[__context.root,path]);
+exports.getJsonFromFile = function (path) {
+  var updatedPath = _path.join.apply(_path, [__context.root, path]);
   var data = fs.readFileSync(updatedPath, 'utf-8');
   return JSON.parse(data);
 }
@@ -134,7 +141,7 @@ exports.getJsonFromFile= function(path){
  *          checks array of checks to be performed
  * @return {Array} the returned value is an array of message (empty if nothing happen)
  */
-exports.checkResponse = function(response, checks) {
+exports.checkResponse = function (response, checks) {
   logger.info("-------------------------------------------------");
   var messages = [];
   for (var i = 0; i < checks.length; i++) {
@@ -166,24 +173,24 @@ exports.checkResponse = function(response, checks) {
             }
             break;
           case 'notempty':
-            if (node === '') {
+            if (node && node.length === 0) {
               msg = "The " + checks[i].path + " must not be empty in the answer";
             }
             break;
           case 'empty':
-            if (node !== '') {
+            if (node && node.length > 0) {
               msg = "The " + checks[i].path + " must be empty in the answer";
             }
             break;
           case 'struct':
             var reference = exports.getJsonFromFile(checks[i].path);
-            var comparison = exports.compareJSONKeys(reference,response);
-            switch(comparison.diff){
+            var comparison = exports.compareJSONKeys(reference, response);
+            switch (comparison.diff) {
               case -1:
-                msg = "Reference has more key -> "+JSON.stringify(comparison.keys_json2);
+                msg = "Reference has more key -> " + JSON.stringify(comparison.keys_json2);
                 break;
               case 1:
-                msg = "Response has more key -> "+JSON.stringify(comparison.keys_json1);
+                msg = "Response has more key -> " + JSON.stringify(comparison.keys_json1);
                 break;
               case 2:
                 msg = "Response and Reference have different keys";
@@ -193,12 +200,14 @@ exports.checkResponse = function(response, checks) {
             break;
           default:
             if (node !== tst) {
-              msg = "Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + node + "'";
+              msg = tst + " Expected value for '" + checks[i].path + "' is '" + tst + "' but was '" + JSON.stringify(node) + "'";
             }
         }
         if (msg !== null) {
           messages.push(msg);
           logger.error(msg);
+          messages.push(JSON.stringify(response, null, 2));
+          logger.error(JSON.stringify(response, null, 2));
         }
       }
     }

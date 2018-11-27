@@ -26,6 +26,8 @@ By default Session is retrieved from the cookie and store in the cookie as:
 npm install -g restshooter
 ```
 
+Then create a script in your package.json to let it run in NPM context rather that bash context.
+
 ## Sample Project
 
 Checkout the sample folder. You can run from this folder
@@ -215,7 +217,7 @@ getting a value in an list of value
 
 So the system will replace the variable by the value from the previous request and we will get the parameter of the logged user.
 
-**${}** is the syntax for the replacement
+**\${}** is the syntax for the replacement
 
 **login** is the name of the step
 
@@ -223,15 +225,25 @@ So the system will replace the variable by the value from the previous request a
 
 ## Hooks
 
-You can add hooks preRequest and postRequest that last will override the default parsing so you must do a parsing in addition to other code.
-You can also do some reference to libraries, you just have to install them in your node modules folder with npm and then accession like that
+You can add hooks preRequest and postRequest, for scenario preRun and postRun that last will override the default parsing so you must do a parsing in addition to other code.
+You can also do some reference to libraries, you just have to install them in your node modules folder with npm and then access it like that
 
 ```javascript
 ...
 "preRequest":function(){
-	var btoa = require(process.cwd()+'/node_modules/btoa/index.js');
+	var btoa = require('btoa');
 	console.log(btoa("Pre Request Processing"));
 }
+...
+```
+
+```javascript
+...
+"preRun":function(scenario){
+    //If you return a promise the process will be stopped until the promise is resolved and fully stopped if rejected
+    console.log("################### Scenario "+scenario.name+" Started #############################");
+  },
+...
 ```
 
 Note that you can install globally and it will work using simply **require('btoa');**
