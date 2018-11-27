@@ -241,6 +241,8 @@ You can also do some reference to libraries, you just have to install them in yo
 ...
 "preRun":function(scenario){
     //If you return a promise the process will be stopped until the promise is resolved and fully stopped if rejected
+    //The object returned by the promise will be part of the initial data as well can be interesting for data injection
+    // and later replacement
     console.log("################### Scenario "+scenario.name+" Started #############################");
   },
 ...
