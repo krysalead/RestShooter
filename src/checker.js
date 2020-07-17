@@ -86,7 +86,7 @@ var updateDiff = function (current, _new_) {
   return _new_;
 };
 /**
- * Compare json1 with json2 and return 0 if identical, 1 if the json1 contains more keys, -1 if json2 contains more keys, -2 if both have different keys
+ * Compare json1 with json2 and return 0 if identic al, 1 if the json1 contains more keys, -1 if json2 contains more keys, -2 if both have different keys
  */
 exports.compareJSONKeys = function (json1, json2) {
   var compare = function (_json1_, _json2_) {
@@ -144,8 +144,11 @@ exports.getJsonFromFile = function (path) {
 exports.checkResponse = function (response, checks) {
   logger.info("-------------------------------------------------");
   var messages = [];
+  if (!checks) {
+    return messages;
+  }
   for (var i = 0; i < checks.length; i++) {
-    logger.info("Checking:" + checks[i].path);
+    logger.debug("Checking:" + checks[i].path);
     var node = getJsonNode(checks[i].path, response);
     if (checks[i].test !== undefined && checks[i].test !== null) {
       var tests = (typeof checks[i].test === 'string' || checks[i].test instanceof String) ? checks[i].test.split("|") : [
